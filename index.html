@@ -82,7 +82,7 @@
                         <button type="button" onclick="tambahItemBaris()" class="text-xs bg-[#E3D5CA] text-[#78350F] px-2 py-1 rounded font-bold hover:bg-[#D5C3B3]">+ Tambah</button>
                     </h3>
                     <div id="wrapper-item-transaksi" class="space-y-3 mb-4">
-                        </div>
+                    </div>
 
                     <div class="mb-4">
                         <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Terbilang Rupiah</label>
@@ -220,7 +220,7 @@
             });
         });
 
-        // Memanggil API lokal Cloudflare Pages Reverse Proxy yang aman bebas hambatan CORS
+        // Menembak endpoint lokal Cloudflare Pages Worker (Aman dari CORS & Token Tersembunyi)
         function muatDataDariGitHub() {
             fetch('/api/database', {
                 method: 'GET',
@@ -241,7 +241,7 @@
             })
             .catch(err => {
                 console.error("Error pada sisi internal Pages Proxy Handler:", err);
-                document.getElementById('database-rows').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600 italic">Gagal menyinkronkan database via Cloudflare Proxy Server. Pastikan folder /functions/api/database.js telah di-push.</td></tr>`;
+                document.getElementById('database-rows').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600 italic">Gagal menyinkronkan database via Cloudflare Proxy Server. Pastikan file _worker.js sudah di-push dan GITHUB_TOKEN diisi.</td></tr>`;
             });
         }
 
@@ -433,6 +433,7 @@
             renderLembarKertasCetak(currentInvoiceData);
         }
 
+        // ... [Sisa fungsi rendering tabel internal database tetap dipertahankan] ...
         function renderDatabaseTable() {
             const tbody = document.getElementById('database-rows');
             tbody.innerHTML = "";
