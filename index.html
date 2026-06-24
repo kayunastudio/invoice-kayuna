@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Invoice & Database GitHub - Kayuna Studio</title>
+    <title>Sistem Invoice & Database Spreadsheet - Kayuna Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         #invoice-paper { width: 210mm; min-height: 297mm; box-sizing: border-box; }
@@ -28,15 +28,16 @@
 </head>
 <body class="bg-[#FDFBF7] text-gray-800 min-h-screen font-sans">
 
+    <!-- PANEL UTAMA DASHBOARD -->
     <div class="container mx-auto p-6 max-w-7xl no-print">
         <header class="flex justify-between items-center mb-8 border-b-2 border-[#D97706] pb-4">
             <div>
                 <h1 class="text-3xl font-bold text-[#78350F]">Kayuna Studio</h1>
-                <p class="text-sm text-[#92400E]">Atelier Management — Database Kayuna</p>
+                <p class="text-sm text-[#92400E]">Atelier Management — Database Spreadsheet</p>
             </div>
             <div class="flex gap-2">
-                <button onclick="muatDataDariGitHub()" class="bg-[#B45309] hover:bg-[#92400E] text-white font-semibold px-4 py-2 rounded-lg shadow-md transition text-sm flex items-center gap-1">
-                    🔄 Sinkron GitHub
+                <button onclick="muatDataDariSpreadsheet()" class="bg-[#B45309] hover:bg-[#92400E] text-white font-semibold px-4 py-2 rounded-lg shadow-md transition text-sm flex items-center gap-1">
+                    🔄 Sinkron Spreadsheet
                 </button>
                 <button onclick="window.print()" class="bg-[#78350F] hover:bg-[#451A03] text-white font-semibold px-6 py-2.5 rounded-lg shadow-md transition duration-200 flex items-center gap-2 text-sm">
                     🖨️ Ekspor ke PDF
@@ -45,6 +46,7 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- PANEL KIRI: INPUT FORM -->
             <div class="bg-[#F5EBE0] p-6 rounded-xl shadow-md lg:col-span-1 h-fit border border-[#E3D5CA]">
                 <h2 class="text-xl font-bold text-[#78350F] mb-4 border-b border-[#E3D5CA] pb-2">1. Input Parameter Dokumen</h2>
                 <form id="invoiceForm" onsubmit="event.preventDefault(); prosesDataInvoice();">
@@ -90,14 +92,15 @@
                     </div>
 
                     <button type="submit" class="w-full mt-4 bg-[#78350F] hover:bg-[#451A03] text-white font-bold p-3 rounded-lg shadow transition">
-                        💾 Simpan & Sinkron ke GitHub
+                        💾 Simpan & Sinkron ke Spreadsheet
                     </button>
                 </form>
             </div>
 
+            <!-- PANEL KANAN: LIVE DATABASE SPREADSHEET -->
             <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2 border border-gray-200 flex flex-col justify-between">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">2. Repositori Database Cloud GitHub</h2>
+                    <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">2. Repositori Database Cloud Spreadsheet</h2>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse text-sm mb-4">
                             <thead>
@@ -111,7 +114,7 @@
                                 </tr>
                             </thead>
                             <tbody id="database-rows" class="divide-y text-gray-700">
-                                <tr><td colspan="6" class="p-4 text-center text-gray-400 italic">Memuat basis data dari Cloud Proxy...</td></tr>
+                                <tr><td colspan="6" class="p-4 text-center text-gray-400 italic">Memuat basis data dari Spreadsheet...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -120,9 +123,11 @@
         </div>
     </div>
 
+    <!-- TAMPILAN KERTAS INVOICE ASLI -->
     <div class="w-full flex justify-center py-4 bg-gray-200 print:bg-white print:py-0">
         <div id="invoice-paper" class="bg-white p-[20mm] border border-gray-300 shadow-xl print:shadow-none print:border-none relative flex flex-col justify-between text-black text-sm leading-relaxed">
             <div>
+                <!-- Header Banner -->
                 <div class="flex justify-between items-start mb-10">
                     <div>
                         <h1 class="text-3xl font-extrabold text-[#78350F] tracking-tight">KAYUNA STUDIO</h1>
@@ -134,6 +139,7 @@
                     </div>
                 </div>
 
+                <!-- Info Klien -->
                 <div class="grid grid-cols-2 gap-8 mb-8 text-xs">
                     <div class="bg-[#FDFBF7] p-4 rounded-lg border border-[#E3D5CA]">
                         <h3 class="font-bold text-[#78350F] uppercase tracking-wider mb-2 text-[10px]">Ditujukan Kepada:</h3>
@@ -152,6 +158,7 @@
                     </div>
                 </div>
 
+                <!-- Tabel Item Pekerjaan -->
                 <table class="w-full text-xs text-left mb-6 border-collapse">
                     <thead>
                         <tr class="bg-[#78350F] text-white font-bold uppercase text-[10px] tracking-wider">
@@ -165,6 +172,7 @@
                     <tbody id="pdf-table-body" class="divide-y divide-gray-200 text-gray-700"></tbody>
                 </table>
 
+                <!-- Rekap -->
                 <div class="flex justify-between items-start mt-4 bg-[#F5EBE0]/40 p-4 rounded-xl border border-[#E3D5CA]">
                     <div class="max-w-[60%]">
                         <h4 class="text-[10px] font-bold uppercase text-gray-400 mb-1">Terbilang Pembayaran:</h4>
@@ -177,6 +185,7 @@
                 </div>
             </div>
 
+            <!-- Footer Area -->
             <div class="mt-12 border-t border-[#E3D5CA] pt-8">
                 <div class="grid grid-cols-12 gap-6 text-xs text-gray-600">
                     <div class="col-span-5 border-r border-gray-200 pr-4">
@@ -204,14 +213,17 @@
         </div>
     </div>
 
+    <!-- ENGINE SCRIPT JAVASCRIPT KONEKSI GOOGLE SPREADSHEET VIA SHEETDB -->
     <script>
+        // Tautan API SheetDB Resmi yang terhubung ke Google Sheets Anda
+        const SHEETDB_API_URL = "https://sheetdb.io/api/v1/3sfyowqw8czq0"; 
+
         let listDatabaseInvoice = [];
-        let fileSha = ""; 
         let currentInvoiceData = null;
 
         document.addEventListener("DOMContentLoaded", () => {
             tambahItemBaris("Interior Ruang Kerja", "14,44 m2", 40000, 577000);
-            muatDataDariGitHub();
+            muatDataDariSpreadsheet();
 
             document.getElementById('wrapper-item-transaksi').addEventListener('input', (e) => {
                 if(e.target.classList.contains('row-harga') || e.target.classList.contains('row-vol')) {
@@ -220,54 +232,66 @@
             });
         });
 
-        // Menembak endpoint lokal Cloudflare Pages Worker (Aman dari CORS & Token Tersembunyi)
-        function muatDataDariGitHub() {
-            fetch('/api/database', {
-                method: 'GET',
-                headers: { 'Cache-Control': 'no-cache' }
-            })
+        // 1. AMBIL DATA DARI GOOGLE SPREADSHEET
+        function muatDataDariSpreadsheet() {
+            fetch(SHEETDB_API_URL)
             .then(res => {
-                if (!res.ok) throw new Error("Cloudflare Proxy returned status HTTP: " + res.status);
+                if (!res.ok) throw new Error("HTTP Error: " + res.status);
                 return res.json();
             })
             .then(data => {
-                fileSha = data.sha; 
-                const jsonText = decodeURIComponent(escape(atob(data.content))); 
-                listDatabaseInvoice = JSON.parse(jsonText);
+                // Parsing ulang data json transaksional dari kolom 'datajson'
+                listDatabaseInvoice = data.map(row => JSON.parse(row.datajson));
                 renderDatabaseTable();
                 if(listDatabaseInvoice.length > 0) {
                     pilihDataUntukCetak(listDatabaseInvoice[listDatabaseInvoice.length - 1].noInvoice);
                 }
             })
             .catch(err => {
-                console.error("Error pada sisi internal Pages Proxy Handler:", err);
-                document.getElementById('database-rows').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600 italic">Gagal menyinkronkan database via Cloudflare Proxy Server. Pastikan file _worker.js sudah di-push dan GITHUB_TOKEN diisi.</td></tr>`;
+                console.error("Gagal menyinkronkan data:", err);
+                document.getElementById('database-rows').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600 italic">Gagal menyinkronkan database dengan Google Sheets. Periksa URL SheetDB Anda.</td></tr>`;
             });
         }
 
-        function simpanKeDatabaseGitHub(pesanCommit) {
-            const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(listDatabaseInvoice, null, 2))));
-
-            const bodyPayload = {
-                message: pesanCommit || `Update database invoice`,
-                content: contentBase64,
-                sha: fileSha
+        // 2. SIMPAN ATAU MEREPOSISI DATA BARU KE GOOGLE SPREADSHEET
+        function kirimKeSpreadsheetProxy(invoiceBaru, isUpdate = false) {
+            const payload = {
+                noinvoice: invoiceBaru.noInvoice,
+                pelanggan: invoiceBaru.pelanggan.nama,
+                tanggal: invoiceBaru.tanggal,
+                total: invoiceBaru.total,
+                status: invoiceBaru.status,
+                datajson: JSON.stringify(invoiceBaru)
             };
 
-            fetch('/api/database', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(bodyPayload)
+            if (isUpdate) {
+                // Modifikasi baris eksis berdasarkan kolom kunci 'noinvoice'
+                fetch(`${SHEETDB_API_URL}/noinvoice/${invoiceBaru.noInvoice}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: payload })
+                })
+                .then(() => renderDatabaseTable())
+                .catch(err => alert("Gagal memperbarui Spreadsheet: " + err));
+            } else {
+                // Menambahkan baris data baru (POST)
+                fetch(SHEETDB_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: [payload] })
+                })
+                .then(() => renderDatabaseTable())
+                .catch(err => alert("Gagal menyimpan ke Spreadsheet: " + err));
+            }
+        }
+
+        // 3. HAPUS BARIS DATA DARI GOOGLE SPREADSHEET
+        function hapusDariSpreadsheet(noInvoice) {
+            fetch(`${SHEETDB_API_URL}/noinvoice/${noInvoice}`, {
+                method: 'DELETE'
             })
-            .then(res => {
-                if (!res.ok) throw new Error("Gagal write repository via proxy: " + res.status);
-                return res.json();
-            })
-            .then(data => {
-                fileSha = data.content.sha; 
-                renderDatabaseTable();
-            })
-            .catch(err => alert("Gagal memperbarui database: " + err));
+            .then(() => renderDatabaseTable())
+            .catch(err => alert("Gagal menghapus dari Spreadsheet: " + err));
         }
 
         function tambahItemBaris(desc = "", vol = "", harga = "", sub = "") {
@@ -352,13 +376,14 @@
             const indexEksis = listDatabaseInvoice.findIndex(inv => inv.noInvoice === invoiceBaru.noInvoice);
             if (indexEksis !== -1) {
                 listDatabaseInvoice[indexEksis] = invoiceBaru;
+                kirimKeSpreadsheetProxy(invoiceBaru, true);
             } else {
                 listDatabaseInvoice.push(invoiceBaru);
+                kirimKeSpreadsheetProxy(invoiceBaru, false);
             }
 
             renderLembarKertasCetak(invoiceBaru);
-            simpanKeDatabaseGitHub(`Tambah/Update Faktur No: ${invoiceBaru.noInvoice}`);
-            alert(`Invoice ${invoiceBaru.noInvoice} berhasil diproses.`);
+            alert(`Invoice ${invoiceBaru.noInvoice} berhasil disinkronkan ke Google Sheets.`);
         }
 
         function toggleLiveStatus(noInvoice, currentStatus) {
@@ -369,14 +394,14 @@
                 if(currentInvoiceData && currentInvoiceData.noInvoice === noInvoice) {
                     document.getElementById('invStatus').value = newStatus;
                 }
-                simpanKeDatabaseGitHub(`Ubah status No: ${noInvoice} menjadi ${newStatus}`);
+                kirimKeSpreadsheetProxy(listDatabaseInvoice[index], true);
             }
         }
 
         function hapusFakturDariDb(noInvoice) {
-            if(confirm(`Apakah Anda yakin ingin menghapus Invoice No: ${noInvoice} dari database GitHub?`)) {
+            if(confirm(`Apakah Anda yakin ingin menghapus Invoice No: ${noInvoice} dari Google Sheets?`)) {
                 listDatabaseInvoice = listDatabaseInvoice.filter(inv => inv.noInvoice !== noInvoice);
-                simpanKeDatabaseGitHub(`Hapus Faktur No: ${noInvoice}`);
+                hapusDariSpreadsheet(noInvoice);
             }
         }
 
@@ -428,12 +453,14 @@
             currentInvoiceData.total = currentInvoiceData.items.reduce((acc, item) => acc + item.sub, 0);
 
             const dbIdx = listDatabaseInvoice.findIndex(inv => inv.noInvoice === currentInvoiceData.noInvoice);
-            if(dbIdx !== -1) listDatabaseInvoice[dbIdx] = currentInvoiceData;
+            if(dbIdx !== -1) {
+                listDatabaseInvoice[dbIdx] = currentInvoiceData;
+                kirimKeSpreadsheetProxy(currentInvoiceData, true);
+            }
 
             renderLembarKertasCetak(currentInvoiceData);
         }
 
-        // ... [Sisa fungsi rendering tabel internal database tetap dipertahankan] ...
         function renderDatabaseTable() {
             const tbody = document.getElementById('database-rows');
             tbody.innerHTML = "";
