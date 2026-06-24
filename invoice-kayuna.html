@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Invoice & Database GitHub - Kayuna Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #invoice-paper { width: 210mm; min-height: 297mm; box-sizing: border-box; }
+        .inv-editable-input { background: transparent; border: none; width: 100%; text-align: inherit; font-family: inherit; font-size: inherit; color: inherit; font-weight: inherit; }
+        .inv-editable-input:focus { background: rgba(244, 234, 230, 0.5); outline: 1px dashed #A16207; }
+        @media print {
+            body { background: white; }
+            .no-print { display: none !important; }
+            #invoice-paper { margin: 0 !important; border: none !important; box-shadow: none !important; padding: 15mm 15mm !important; width: 100% !important; min-height: auto !important; }
+            .inv-editable-input { outline: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-[#FDFBF7] text-gray-800 min-h-screen font-sans">
+
+    <!-- PANEL UTAMA DASHBOARD (TEMA COKELAT KAYU MUDA) -->
+    <div class="container mx-auto p-6 max-w-7xl no-print">
+        <header class="flex justify-between items-center mb-8 border-b-2 border-[#D97706] pb-4">
+            <div>
+                <h1 class="text-3xl font-bold text-[#78350F]">Kayuna Studio</h1>
+                <p class="text-sm text-[#92400E]">Atelier Management — Database Kayuna</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="muatDataDariGitHub()" class="bg-[#B45309] hover:bg-[#92400E] text-white font-semibold px-4 py-2 rounded-lg shadow-md transition text-sm flex items-center gap-1">
+                    🔄 Sinkron GitHub
+                </button>
+                <button onclick="window.print()" class="bg-[#78350F] hover:bg-[#451A03] text-white font-semibold px-6 py-2.5 rounded-lg shadow-md transition duration-200 flex items-center gap-2 text-sm">
+                    🖨️ Ekspor ke PDF
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- PANEL KIRI: INPUT FORM -->
+            <div class="bg-[#F5EBE0] p-6 rounded-xl shadow-md lg:col-span-1 h-fit border border border-[#E3D5CA]">
+                <h2 class="text-xl font-bold text-[#78350F] mb-4 border-b border-[#E3D5CA] pb-2">1. Input Parameter Dokumen</h2>
+                <form id="invoiceForm" onsubmit="event.preventDefault(); prosesDataInvoice();">
+                    <div class="grid grid-cols-3 gap-2 mb-4">
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">No. Invoice</label>
+                            <input type="text" id="invNo" required value="26153-001" class="w-full border border-[#D5C3B3] p-2 rounded focus:outline-none focus:border-[#78350F] bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Status</label>
+                            <select id="invStatus" class="w-full border border-[#D5C3B3] p-2 rounded focus:outline-none focus:border-[#78350F] bg-white font-semibold text-sm">
+                                <option value="Belum Lunas" class="text-amber-700 font-bold">❌ Belum Lunas</option>
+                                <option value="Lunas" class="text-emerald-700 font-bold">✅ Lunas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mb-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Tanggal</label>
+                            <input type="text" id="invTgl" required value="30-Mei 2026" class="w-full border border-[#D5C3B3] p-2 rounded text-sm focus:outline-none focus:border-[#78350F] bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Jatuh Tempo</label>
+                            <input type="text" id="invTempo" required value="02-Jun 2026" class="w-full border border-[#D5C3B3] p-2 rounded text-sm focus:outline-none focus:border-[#78350F] bg-white">
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-[#78350F] mt-6 mb-2">Data Pelanggan</h3>
+                    <div class="mb-2"><input type="text" id="custNama" required placeholder="Nama Klien" value="Neta Pirawan" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></div>
+                    <div class="mb-2"><input type="text" id="custHp" required placeholder="No. HP" value="0813-2042-2190" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></div>
+                    <div class="mb-4"><textarea id="custAlamat" required placeholder="Alamat" rows="2" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white">Jl. Sriwijaya, Kota Bandung, Jawa Barat</textarea></div>
+
+                    <h3 class="text-sm font-bold text-[#78350F] mt-6 mb-2 flex justify-between items-center">
+                        <span>Daftar Transaksi</span>
+                        <button type="button" onclick="tambahItemBaris()" class="text-xs bg-[#E3D5CA] text-[#78350F] px-2 py-1 rounded font-bold hover:bg-[#D5C3B3]">+ Tambah</button>
+                    </h3>
+                    <div id="wrapper-item-transaksi" class="space-y-3 mb-4">
+                        <!-- Item Baris dikelola dinamis lewat JS -->
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Terbilang Rupiah</label>
+                        <input type="text" id="invTerbilang" required value="Enam Ratus Tiga Ribu Lima Ratus Rupiah" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white">
+                    </div>
+
+                    <button type="submit" class="w-full mt-4 bg-[#78350F] hover:bg-[#451A03] text-white font-bold p-3 rounded-lg shadow transition">
+                        💾 Simpan & Sinkron ke GitHub
+                    </button>
+                </form>
+            </div>
+
+            <!-- PANEL KANAN: LIVE DATABASE DARI GITHUB -->
+            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2 border border-gray-200 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">2. Repositori Database Cloud GitHub</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm mb-4">
+                            <thead>
+                                <tr class="bg-[#F5EBE0] text-[#78350F] font-bold border-b border-[#E3D5CA]">
+                                    <th class="p-3">No. Invoice</th>
+                                    <th class="p-3">Pelanggan</th>
+                                    <th class="p-3">Nilai Total</th>
+                                    <th class="p-3 text-center">Status</th>
+                                    <th class="p-3 text-center">Tindakan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="database-rows" class="divide-y text-gray-700">
+                                <tr><td colspan="5" class="p-4 text-center text-gray-400 italic">Memuat basis data dari GitHub...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAMPILAN KERTAS INVOICE ASLI (SEKARANG TEMA COKELAT KAYU MUDA) -->
+    <div class="w-full flex justify-center py-4 bg-gray-200 print:bg-white print:py-0">
+        <div id="invoice-paper" class="bg-white p-[20mm] border border-gray-300 shadow-xl print:shadow-none print:border-none relative flex flex-col justify-between text-black text-sm leading-relaxed">
+            <div>
+                <!-- Header Banner -->
+                <div class="flex justify-between items-start mb-10">
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-[#78350F] tracking-tight">KAYUNA STUDIO</h1>
+                        <p class="text-xs tracking-[0.25em] font-medium text-[#B45309]">BRAND DAN DESAIN ARSITEKTURAL STUDIO</p>
+                    </div>
+                    <div class="text-right">
+                        <h2 class="text-4xl font-light text-gray-400 tracking-widest uppercase mb-1">INVOICE</h2>
+                        <p class="text-xs font-semibold text-gray-700">Nomor Faktur: <span id="pdf-inv-no" class="text-black font-bold">-</span></p>
+                    </div>
+                </div>
+
+                <!-- Info Klien -->
+                <div class="grid grid-cols-2 gap-8 mb-8 text-xs">
+                    <div class="bg-[#FDFBF7] p-4 rounded-lg border border-[#E3D5CA]">
+                        <h3 class="font-bold text-[#78350F] uppercase tracking-wider mb-2 text-[10px]">Ditujukan Kepada:</h3>
+                        <p id="pdf-cust-nama" class="font-bold text-sm text-gray-900 mb-0.5">-</p>
+                        <p id="pdf-cust-hp" class="text-gray-600 mb-2">-</p>
+                        <p class="font-bold text-[10px] uppercase text-gray-400 mb-0.5">Alamat:</p>
+                        <p id="pdf-cust-alamat" class="text-gray-700 leading-normal">-</p>
+                    </div>
+                    <div class="flex flex-col justify-between p-4 border border-[#E3D5CA] rounded-lg bg-[#FDFBF7]">
+                        <div class="grid grid-cols-2 gap-y-2">
+                            <div class="font-bold text-gray-500 uppercase text-[10px]">Tanggal Cetak</div>
+                            <div id="pdf-inv-tgl" class="text-gray-900 font-medium">: -</div>
+                            <div class="font-bold text-gray-500 uppercase text-[10px]">Jatuh Tempo</div>
+                            <div id="pdf-inv-tempo" class="text-rose-700 font-bold">: -</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabel Item Pekerjaan -->
+                <table class="w-full text-xs text-left mb-6 border-collapse">
+                    <thead>
+                        <tr class="bg-[#78350F] text-white font-bold uppercase text-[10px] tracking-wider">
+                            <th class="p-3 rounded-l-md w-12 text-center">No</th>
+                            <th class="p-3">Deskripsi Pekerjaan / Jasa</th>
+                            <th class="p-3 text-center w-28">Volume</th>
+                            <th class="p-3 text-right w-32">Harga Satuan (Rp)</th>
+                            <th class="p-3 text-right rounded-r-md w-32">Total Biaya</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pdf-table-body" class="divide-y divide-gray-200 text-gray-700"></tbody>
+                </table>
+
+                <!-- Rekap -->
+                <div class="flex justify-between items-start mt-4 bg-[#F5EBE0]/40 p-4 rounded-xl border border-[#E3D5CA]">
+                    <div class="max-w-[60%]">
+                        <h4 class="text-[10px] font-bold uppercase text-gray-400 mb-1">Terbilang Pembayaran:</h4>
+                        <p id="pdf-inv-terbilang" class="italic font-medium text-[#78350F] text-xs">"-"</p>
+                    </div>
+                    <div class="text-right min-w-[30%]">
+                        <span class="text-[10px] font-bold uppercase text-gray-400 block mb-1">Total Biaya Akhir</span>
+                        <span id="pdf-inv-total" class="text-xl font-extrabold text-[#78350F] block">Rp. 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Area -->
+            <div class="mt-12 border-t border-[#E3D5CA] pt-8">
+                <div class="grid grid-cols-12 gap-6 text-xs text-gray-600">
+                    <div class="col-span-5 border-r border-gray-200 pr-4">
+                        <h4 class="font-bold text-gray-900 uppercase text-[10px] tracking-wider mb-2">Informasi Pembayaran Rekening:</h4>
+                        <div class="space-y-1.5 text-[11px]">
+                            <div class="flex justify-between"><span class="text-gray-400">Nama Bank</span><span class="font-semibold text-gray-900">Seabank Indonesia</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">No. Rekening</span><span class="font-mono font-bold text-gray-900">901277201344</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Atas Nama</span><span class="font-semibold text-[#78350F]">Irfan Ripandi</span></div>
+                        </div>
+                    </div>
+                    <div class="col-span-3 border-r border-gray-200 px-4 text-center flex flex-col items-center">
+                        <h4 class="font-bold text-gray-900 uppercase text-[9px] tracking-wider mb-2">Atau Scan QRIS Resmi:</h4>
+                        <div class="w-24 h-24 bg-white border p-1 rounded-md shadow-sm">
+                            <img src="https://github.com/kayunastudio/QRIS/blob/main/qris.JPG?raw=true" class="w-full h-full object-contain" alt="QRIS">
+                        </div>
+                    </div>
+                    <div class="col-span-4 pl-4 text-right flex flex-col justify-between">
+                        <div>
+                            <h4 class="font-bold text-gray-900 uppercase text-[10px] tracking-wider mb-1">Kayuna Studio Office:</h4>
+                            <p class="text-[10px] text-gray-500">Jl. Sariwangi Selatan, Sariwangi, Parongpong, Kab. Bandung Barat</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ENGINE SCRIPT JAVASCRIPT KONEKSI GITHUB API -->
+    <script>
+        // ==========================================
+        //  MASUKKAN KONFIGURASI GITHUB ANDA DI SINI
+        // ==========================================
+        const GITHUB_TOKEN = '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'; 
+        const REPO_OWNER = 'kayunastudio';              
+        const REPO_NAME = 'database-invoice-kayuna';                   
+        const FILE_PATH = 'data.json';                          
+
+        let listDatabaseInvoice = [];
+        let fileSha = ""; 
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // Pasang baris sampel default pertama kali
+            tambahItemBaris("Interior Ruang Kerja", "14,44 m2", 40000, 577000);
+            muatDataDariGitHub();
+
+            document.getElementById('wrapper-item-transaksi').addEventListener('input', (e) => {
+                if(e.target.classList.contains('row-harga') || e.target.classList.contains('row-vol')) {
+                    hitungSubtotalBaris(e.target.closest('.item-row'));
+                }
+            });
+        });
+
+        function muatDataDariGitHub() {
+            if(GITHUB_TOKEN === 'TEMPEL_TOKEN_GITHUB_ANDA_DISINI' || REPO_OWNER === 'USERNAME_GITHUB_ANDA') {
+                document.getElementById('database-rows').innerHTML = `<tr><td colspan="5" class="p-4 text-center text-amber-700 bg-amber-50 font-medium border border-amber-200 rounded-lg">⚠️ Silakan konfigurasi Token & Nama Repository GitHub Anda di dalam baris kode script!</td></tr>`;
+                return;
+            }
+
+            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+            
+            fetch(url, {
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                fileSha = data.sha; 
+                const jsonText = atob(data.content); 
+                listDatabaseInvoice = JSON.parse(jsonText);
+                renderDatabaseTable();
+                if(listDatabaseInvoice.length > 0) {
+                    renderLembarKertasCetak(listDatabaseInvoice[listDatabaseInvoice.length - 1]);
+                }
+            })
+            .catch(err => {
+                console.error("Gagal memuat basis data dari GitHub:", err);
+                document.getElementById('database-rows').innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-600 italic">Gagal terkoneksi ke API GitHub. Pastikan token & nama repo benar.</td></tr>`;
+            });
+        }
+
+        function simpanKeDatabaseGitHub(pesanCommit) {
+            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+            const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(listDatabaseInvoice, null, 2))));
+
+            const bodyPayload = {
+                message: pesanCommit || `Update database invoice`,
+                content: contentBase64,
+                sha: fileSha
+            };
+
+            fetch(url, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(bodyPayload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                fileSha = data.content.sha; 
+                renderDatabaseTable();
+            })
+            .catch(err => alert("Gagal menyimpan ke GitHub: " + err));
+        }
+
+        // Fitur Tambah baris transaksi lengkap dengan tombol hapus terintegrasi
+        function tambahItemBaris(desc = "", vol = "", harga = "", sub = "") {
+            const wrapper = document.getElementById('wrapper-item-transaksi');
+            const newRow = document.createElement('div');
+            newRow.className = "item-row bg-white p-3 rounded border border-[#E3D5CA] relative group";
+            newRow.innerHTML = `
+                <div class="flex justify-between items-center mb-1">
+                    <input type="text" placeholder="Deskripsi Jasa / Barang" value="${desc}" class="row-desc w-[85%] border p-1.5 text-xs rounded border-gray-200 focus:outline-none focus:border-[#78350F]">
+                    <button type="button" onclick="hapusBarisItem(this)" class="text-xs bg-rose-50 text-rose-600 font-bold px-2 py-1 rounded border border-rose-200 hover:bg-rose-100 transition shadow-sm">
+                        Hapus
+                    </button>
+                </div>
+                <div class="grid grid-cols-3 gap-1">
+                    <input type="text" placeholder="Vol" value="${vol}" class="row-vol w-full border p-1.5 text-xs rounded border-gray-200 focus:outline-none focus:border-[#78350F]">
+                    <input type="number" placeholder="Harga" value="${harga}" class="row-harga w-full border p-1.5 text-xs rounded border-gray-200 focus:outline-none focus:border-[#78350F]">
+                    <input type="number" placeholder="Subtotal" value="${sub}" class="row-sub w-full border p-1.5 text-xs rounded bg-gray-50 font-semibold border-gray-200" readonly>
+                </div>
+            `;
+            wrapper.appendChild(newRow);
+        }
+
+        function hapusBarisItem(button) {
+            const wrapper = document.getElementById('wrapper-item-transaksi');
+            button.closest('.item-row').remove();
+            
+            // Jika baris habis, otomatis buatkan satu baris kosong agar form tidak bolong
+            if (wrapper.children.length === 0) {
+                tambahItemBaris();
+            }
+            
+            // Hitung ulang nominal invoice setelah baris dikurangi
+            rekapTotalSeketika();
+        }
+
+        function hitungSubtotalBaris(rowElement) {
+            const volStr = rowElement.querySelector('.row-vol').value;
+            const harga = parseFloat(rowElement.querySelector('.row-harga').value) || 0;
+            const subInput = rowElement.querySelector('.row-sub');
+            const volAngka = parseFloat(volStr.replace(/[^0-9,.]/g, '').replace(',', '.')) || 0;
+            subInput.value = volAngka > 0 ? Math.round(volAngka * harga) : 0;
+        }
+
+        function rekapTotalSeketika() {
+            const listBarisForm = document.querySelectorAll('.item-row');
+            let total = 0;
+            listBarisForm.forEach(row => {
+                total += parseFloat(row.querySelector('.row-sub').value) || 0;
+            });
+            if(currentInvoiceData) {
+                currentInvoiceData.total = total;
+                document.getElementById('pdf-inv-total').innerText = "Rp. " + total.toLocaleString('id-ID');
+            }
+        }
+
+        let currentInvoiceData = null;
+        function prosesDataInvoice() {
+            const listBarisForm = document.querySelectorAll('.item-row');
+            let items = [];
+            let total = 0;
+
+            listBarisForm.forEach((row, idx) => {
+                const desc = row.querySelector('.row-desc').value;
+                const vol = row.querySelector('.row-vol').value;
+                const harga = parseFloat(row.querySelector('.row-harga').value) || 0;
+                const sub = parseFloat(row.querySelector('.row-sub').value) || 0;
+                if(desc !== "") {
+                    items.push({ no: idx + 1, desc, vol, harga, sub });
+                    total += sub;
+                }
+            });
+
+            currentInvoiceData = {
+                noInvoice: document.getElementById('invNo').value,
+                status: document.getElementById('invStatus').value,
+                tanggal: document.getElementById('invTgl').value,
+                jatuhTempo: document.getElementById('invTempo').value,
+                pelanggan: {
+                    nama: document.getElementById('custNama').value,
+                    hp: document.getElementById('custHp').value,
+                    alamat: document.getElementById('custAlamat').value
+                },
+                items: items,
+                total: total,
+                terbilang: document.getElementById('invTerbilang').value
+            };
+
+            const indexEksis = listDatabaseInvoice.findIndex(inv => inv.noInvoice === currentInvoiceData.noInvoice);
+            if (indexEksis !== -1) {
+                listDatabaseInvoice[indexEksis] = currentInvoiceData;
+            } else {
+                listDatabaseInvoice.push(currentInvoiceData);
+            }
+
+            renderLembarKertasCetak(currentInvoiceData);
+            simpanKeDatabaseGitHub(`Tambah/Update Faktur No: ${currentInvoiceData.noInvoice}`);
+            alert(`Invoice ${currentInvoiceData.noInvoice} berhasil diproses.`);
+        }
+
+        function toggleLiveStatus(noInvoice, currentStatus) {
+            const newStatus = currentStatus === 'Lunas' ? 'Belum Lunas' : 'Lunas';
+            const index = listDatabaseInvoice.findIndex(inv => inv.noInvoice === noInvoice);
+            if(index !== -1) {
+                listDatabaseInvoice[index].status = newStatus;
+                if(currentInvoiceData && currentInvoiceData.noInvoice === noInvoice) {
+                    document.getElementById('invStatus').value = newStatus;
+                }
+                simpanKeDatabaseGitHub(`Ubah status No: ${noInvoice} menjadi ${newStatus}`);
+            }
+        }
+
+        function renderLembarKertasCetak(invoice) {
+            currentInvoiceData = invoice;
+            document.getElementById('pdf-inv-no').innerText = invoice.noInvoice;
+            document.getElementById('pdf-cust-nama').innerText = invoice.pelanggan.nama;
+            document.getElementById('pdf-cust-hp').innerText = invoice.pelanggan.hp;
+            document.getElementById('pdf-cust-alamat').innerText = invoice.pelanggan.alamat;
+            document.getElementById('pdf-inv-tgl').innerText = ": " + invoice.tanggal;
+            document.getElementById('pdf-inv-tempo').innerText = ": " + invoice.jatuhTempo;
+            document.getElementById('pdf-inv-terbilang').innerText = `"${invoice.terbilang}"`;
+            document.getElementById('pdf-inv-total').innerText = "Rp. " + invoice.total.toLocaleString('id-ID');
+            document.getElementById('invStatus').value = invoice.status || "Belum Lunas";
+
+            const tbody = document.getElementById('pdf-table-body');
+            tbody.innerHTML = "";
+            invoice.items.forEach((item, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 text-center border-b border-gray-100">${item.no}</td>
+                    <td class="p-3 border-b border-gray-100 font-medium">${item.desc}</td>
+                    <td class="p-3 border-b border-gray-100 text-center"><input type="text" class="inv-editable-input text-center" value="${item.vol}" onchange="updateLiveValue(${idx}, 'vol', this.value)"></td>
+                    <td class="p-3 border-b border-gray-100 text-right"><input type="number" class="inv-editable-input text-right" value="${item.harga}" onchange="updateLiveValue(${idx}, 'harga', this.value)"></td>
+                    <td class="p-3 border-b border-gray-100 text-right font-bold">Rp. ${item.sub.toLocaleString('id-ID')}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateLiveValue(itemIdx, field, value) {
+            if(!currentInvoiceData) return;
+            if(field === 'harga') currentInvoiceData.items[itemIdx].harga = parseFloat(value) || 0;
+            if(field === 'vol') currentInvoiceData.items[itemIdx].vol = value;
+
+            const volAngka = parseFloat(currentInvoiceData.items[itemIdx].vol.replace(/[^0-9,.]/g, '').replace(',', '.')) || 0;
+            currentInvoiceData.items[itemIdx].sub = Math.round(volAngka * currentInvoiceData.items[itemIdx].harga);
+            currentInvoiceData.total = currentInvoiceData.items.reduce((acc, item) => acc + item.sub, 0);
+
+            const dbIdx = listDatabaseInvoice.findIndex(inv => inv.noInvoice === currentInvoiceData.noInvoice);
+            if(dbIdx !== -1) listDatabaseInvoice[dbIdx] = currentInvoiceData;
+
+            renderLembarKertasCetak(currentInvoiceData);
+        }
+
+        function renderDatabaseTable() {
+            const tbody = document.getElementById('database-rows');
+            tbody.innerHTML = "";
+            if(listDatabaseInvoice.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400 italic">Belum ada invoice yang tercatat.</td></tr>`;
+                return;
+            }
+
+            listDatabaseInvoice.forEach(invoice => {
+                const statusStr = invoice.status || "Belum Lunas";
+                const isLunas = statusStr === "Lunas";
+                const badgeClass = isLunas 
+                    ? "bg-emerald-100 text-emerald-800 border-emerald-200" 
+                    : "bg-amber-100 text-amber-800 border-amber-200";
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-[#F5EBE0]/30 border-b border-gray-100 text-xs";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-[#78350F]">${invoice.noInvoice}</td>
+                    <td class="p-3">
+                        <div class="font-semibold text-gray-900">${invoice.pelanggan.nama}</div>
+                        <div class="text-[10px] text-gray-400">${invoice.tanggal}</div>
+                    </td>
+                    <td class="p-3 font-bold text-gray-900">Rp. ${invoice.total.toLocaleString('id-ID')}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="toggleLiveStatus('${invoice.noInvoice}', '${statusStr}')" title="Klik untuk ubah status cepat" class="px-2 py-1 rounded-full border text-[10px] font-bold transition duration-150 ${badgeClass}">
+                            ${isLunas ? "✅ Lunas" : "❌ Belum Lunas"}
+                        </button>
+                    </td>
+                    <td class="p-3 text-center">
+                        <button onclick="bukaFakturDariDb('${invoice.noInvoice}')" class="bg-[#78350F] text-white py-1 px-3 rounded text-[11px] font-semibold hover:bg-[#451A03]">Buka</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function bukaFakturDariDb(no) {
+            const target = listDatabaseInvoice.find(inv => inv.noInvoice === no);
+            if(target) {
+                renderLembarKertasCetak(target);
+                document.getElementById('invNo').value = target.noInvoice;
+                document.getElementById('invTgl').value = target.tanggal;
+                document.getElementById('invTempo').value = target.jatuhTempo;
+                document.getElementById('custNama').value = target.pelanggan.nama;
+                document.getElementById('custHp').value = target.pelanggan.hp;
+                document.getElementById('custAlamat').value = target.pelanggan.alamat;
+                document.getElementById('invTerbilang').value = target.terbilang;
+
+                const wrapper = document.getElementById('wrapper-item-transaksi');
+                wrapper.innerHTML = "";
+                target.items.forEach(item => {
+                    tambahItemBaris(item.desc, item.vol, item.harga, item.sub);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
