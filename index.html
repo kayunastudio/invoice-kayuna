@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Invoice & Database - Kayuna Studio</title>
+    <title>Sistem Invoice & Database Spreadsheet - Kayuna Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         #invoice-paper { width: 210mm; min-height: 297mm; box-sizing: border-box; }
@@ -64,11 +64,11 @@
                     <div class="grid grid-cols-2 gap-2 mb-4">
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Tanggal</label>
-                            <input type="text" id="invTgl" required value="30-Mei 2026" class="w-full border border-[#D5C3B3] p-2 rounded text-sm focus:outline-none focus:border-[#78350F] bg-white">
+                            <input type="date" id="invTgl" required class="w-full border border-[#D5C3B3] p-2 rounded text-sm focus:outline-none focus:border-[#78350F] bg-white text-gray-700">
                         </div>
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Jatuh Tempo</label>
-                            <input type="text" id="invTempo" required value="02-Jun 2026" class="w-full border border-[#D5C3B3] p-2 rounded text-sm focus:outline-none focus:border-[#78350F] bg-white">
+                            <input type="date" id="invTempo" required class="w-full border border-[#D5C3B3] p-2 rounded text-sm focus:outline-none focus:border-[#78350F] bg-white text-gray-700">
                         </div>
                     </div>
 
@@ -211,6 +211,11 @@
         let currentInvoiceData = null;
 
         document.addEventListener("DOMContentLoaded", () => {
+            // Mengatur input tanggal form ke hari ini secara otomatis saat pertama dibuka
+            const hariIni = new Date().toISOString().split('T')[0];
+            document.getElementById('invTgl').value = hariIni;
+            document.getElementById('invTempo').value = hariIni;
+
             tambahItemBaris("Interior Ruang Kerja", "14,44 m2", 40000, 577000);
             muatDataDariSpreadsheet();
 
@@ -222,7 +227,27 @@
         });
 
         // =========================================================================
-        // FIX ALGORITMA KONVERSI TERBILANG TANPA PENGULANGAN KATA / REDUNDANCI
+        // ALGORITMA KONVERSI TANGGAL SISTEM KE TEKS BAHASA INDONESIA
+        // =========================================================================
+        function formatTanggalIndonesia(stringTanggal) {
+            if (!stringTanggal) return "-";
+            const parts = stringTanggal.split('-');
+            if (parts.length !== 3) return stringTanggal; // Jaga-jaga jika format data lama berbentuk teks bebas
+
+            const tahun = parts[0];
+            const bulanIndex = parseInt(parts[1], 10) - 1;
+            const tanggal = parseInt(parts[2], 10);
+
+            const daftarBulan = [
+                "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+            ];
+
+            return `${tanggal} ${daftarBulan[bulanIndex]} ${tahun}`;
+        }
+
+        // =========================================================================
+        // ALGORITMA KONVERSI TERBILANG TANPA PENGULANGAN KATA
         // =========================================================================
         function ambilTeksAngkaMurni(angka) {
             const bilangan = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
@@ -243,8 +268,6 @@
         function konversiAngkaKeTerbilang(totalBiaya) {
             if (!totalBiaya || totalBiaya === 0) return "Nol Rupiah";
             let stringMurni = ambilTeksAngkaMurni(totalBiaya);
-            
-            // Satukan kalimat dan tambahkan kata Rupiah satu kali di paling akhir objek string
             stringMurni = stringMurni.replace(/\s+/g, ' ').trim();
             return stringMurni + " Rupiah";
         }
@@ -408,8 +431,8 @@
             const invoiceBaru = {
                 noInvoice: document.getElementById('invNo').value,
                 status: document.getElementById('invStatus').value,
-                tanggal: document.getElementById('invTgl').value,
-                jatuhTempo: document.getElementById('invTempo').value,
+                tanggal: document.getElementById('invTgl').value,      // Menyimpan format YYYY-MM-DD
+                jatuhTempo: document.getElementById('invTempo').value,  // Menyimpan format YYYY-MM-DD
                 pelanggan: {
                     nama: document.getElementById('custNama').value,
                     hp: document.getElementById('custHp').value,
@@ -433,7 +456,6 @@
             alert(`Invoice ${invoiceBaru.noInvoice} berhasil disinkronkan ke Google Sheets.`);
         }
 
-        // Cepat ubah status bayar via list database
         function toggleLiveStatus(noInvoice, currentStatus) {
             const newStatus = currentStatus === 'Lunas' ? 'Belum Lunas' : 'Lunas';
             const index = listDatabaseInvoice.findIndex(inv => inv.noInvoice === noInvoice);
@@ -466,8 +488,16 @@
             document.getElementById('pdf-cust-nama').innerText = invoice.pelanggan.nama;
             document.getElementById('pdf-cust-hp').innerText = invoice.pelanggan.hp;
             document.getElementById('pdf-cust-alamat').innerText = invoice.pelanggan.alamat;
-            document.getElementById('pdf-inv-tgl').innerText = ": " + invoice.tanggal;
-            document.getElementById('pdf-inv-tempo').innerText = ": " + invoice.jatuhTempo;
+            
+            // Konversi nilai sistem ke format teks tanggal Indonesia saat cetak ke kertas A4
+            document.getElementById('pdf-inv-tgl').innerText = ": " + formatTanggalIndonesia(invoice.tanggal);
+            document.getElementById('pdf-inv-tempo').innerText = ": " + formatTanggalIndonesia(invoice.jatuhTempo);
+            
+            // Kembalikan nilai ke form input
+            document.getElementById('invTgl').value = invoice.tanggal;
+            document.getElementById('invTempo').value = invoice.jatuhTempo;
+            document.getElementById('invStatus').value = invoice.status;
+
             document.getElementById('pdf-inv-terbilang').innerText = `"${invoice.terbilang}"`;
             document.getElementById('pdf-inv-total').innerText = "Rp. " + invoice.total.toLocaleString('id-ID');
             document.getElementById('invTerbilang').value = invoice.terbilang;
@@ -538,7 +568,7 @@
                     <td class="p-3 font-bold text-[#78350F]">${invoice.noInvoice}</td>
                     <td class="p-3">
                         <div class="font-semibold text-gray-900">${invoice.pelanggan.nama}</div>
-                        <div class="text-[10px] text-gray-400">${invoice.tanggal}</div>
+                        <div class="text-[10px] text-gray-400">${formatTanggalIndonesia(invoice.tanggal)}</div>
                     </td>
                     <td class="p-3 font-bold text-gray-900">Rp. ${invoice.total.toLocaleString('id-ID')}</td>
                     <td class="p-3 text-center">
