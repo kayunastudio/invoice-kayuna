@@ -28,7 +28,6 @@
 </head>
 <body class="bg-[#FDFBF7] text-gray-800 min-h-screen font-sans">
 
-    <!-- PANEL UTAMA DASHBOARD -->
     <div class="container mx-auto p-6 max-w-7xl no-print">
         <header class="flex justify-between items-center mb-8 border-b-2 border-[#D97706] pb-4">
             <div>
@@ -46,7 +45,6 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- PANEL KIRI: INPUT FORM -->
             <div class="bg-[#F5EBE0] p-6 rounded-xl shadow-md lg:col-span-1 h-fit border border-[#E3D5CA]">
                 <h2 class="text-xl font-bold text-[#78350F] mb-4 border-b border-[#E3D5CA] pb-2">1. Input Parameter Dokumen</h2>
                 <form id="invoiceForm" onsubmit="event.preventDefault(); prosesDataInvoice();">
@@ -87,8 +85,8 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Terbilang Rupiah</label>
-                        <input type="text" id="invTerbilang" required value="Enam Ratus Tiga Ribu Lima Ratus Rupiah" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Terbilang Rupiah (Otomatis)</label>
+                        <input type="text" id="invTerbilang" readonly required value="Nol Rupiah" class="w-full border border-gray-300 p-2 rounded text-sm bg-gray-100 font-medium text-gray-700 focus:outline-none">
                     </div>
 
                     <button type="submit" class="w-full mt-4 bg-[#78350F] hover:bg-[#451A03] text-white font-bold p-3 rounded-lg shadow transition">
@@ -97,7 +95,6 @@
                 </form>
             </div>
 
-            <!-- PANEL KANAN: LIVE DATABASE SPREADSHEET -->
             <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2 border border-gray-200 flex flex-col justify-between">
                 <div>
                     <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">2. Repositori Database Cloud Spreadsheet</h2>
@@ -123,11 +120,9 @@
         </div>
     </div>
 
-    <!-- TAMPILAN KERTAS INVOICE ASLI -->
     <div class="w-full flex justify-center py-4 bg-gray-200 print:bg-white print:py-0">
         <div id="invoice-paper" class="bg-white p-[20mm] border border-gray-300 shadow-xl print:shadow-none print:border-none relative flex flex-col justify-between text-black text-sm leading-relaxed">
             <div>
-                <!-- Header Banner -->
                 <div class="flex justify-between items-start mb-10">
                     <div>
                         <h1 class="text-3xl font-extrabold text-[#78350F] tracking-tight">KAYUNA STUDIO</h1>
@@ -139,7 +134,6 @@
                     </div>
                 </div>
 
-                <!-- Info Klien -->
                 <div class="grid grid-cols-2 gap-8 mb-8 text-xs">
                     <div class="bg-[#FDFBF7] p-4 rounded-lg border border-[#E3D5CA]">
                         <h3 class="font-bold text-[#78350F] uppercase tracking-wider mb-2 text-[10px]">Ditujukan Kepada:</h3>
@@ -158,7 +152,6 @@
                     </div>
                 </div>
 
-                <!-- Tabel Item Pekerjaan -->
                 <table class="w-full text-xs text-left mb-6 border-collapse">
                     <thead>
                         <tr class="bg-[#78350F] text-white font-bold uppercase text-[10px] tracking-wider">
@@ -172,11 +165,10 @@
                     <tbody id="pdf-table-body" class="divide-y divide-gray-200 text-gray-700"></tbody>
                 </table>
 
-                <!-- Rekap -->
                 <div class="flex justify-between items-start mt-4 bg-[#F5EBE0]/40 p-4 rounded-xl border border-[#E3D5CA]">
                     <div class="max-w-[60%]">
                         <h4 class="text-[10px] font-bold uppercase text-gray-400 mb-1">Terbilang Pembayaran:</h4>
-                        <p id="pdf-inv-terbilang" class="italic font-medium text-[#78350F] text-xs">"-"</p>
+                        <p id="pdf-inv-terbilang" class="italic font-medium text-[#78350F] text-xs">"Nol Rupiah"</p>
                     </div>
                     <div class="text-right min-w-[30%]">
                         <span class="text-[10px] font-bold uppercase text-gray-400 block mb-1">Total Biaya Akhir</span>
@@ -185,7 +177,6 @@
                 </div>
             </div>
 
-            <!-- Footer Area -->
             <div class="mt-12 border-t border-[#E3D5CA] pt-8">
                 <div class="grid grid-cols-12 gap-6 text-xs text-gray-600">
                     <div class="col-span-5 border-r border-gray-200 pr-4">
@@ -213,9 +204,7 @@
         </div>
     </div>
 
-    <!-- ENGINE SCRIPT JAVASCRIPT KONEKSI GOOGLE SPREADSHEET VIA SHEETDB -->
     <script>
-        // Tautan API SheetDB Resmi yang terhubung ke Google Sheets Anda
         const SHEETDB_API_URL = "https://sheetdb.io/api/v1/3sfyowqw8czq0"; 
 
         let listDatabaseInvoice = [];
@@ -232,6 +221,34 @@
             });
         });
 
+        // =========================================================================
+        // FIX ALGORITMA KONVERSI TERBILANG TANPA PENGULANGAN KATA / REDUNDANCI
+        // =========================================================================
+        function ambilTeksAngkaMurni(angka) {
+            const bilangan = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+            angka = Math.floor(Math.abs(angka));
+
+            if (angka < 12) return bilangan[angka];
+            if (angka < 20) return ambilTeksAngkaMurni(angka - 10) + " Belas";
+            if (angka < 100) return ambilTeksAngkaMurni(angka / 10) + " Puluh " + ambilTeksAngkaMurni(angka % 10);
+            if (angka < 200) return "Seratus " + ambilTeksAngkaMurni(angka - 100);
+            if (angka < 1000) return ambilTeksAngkaMurni(angka / 100) + " Ratus " + ambilTeksAngkaMurni(angka % 100);
+            if (angka < 2000) return "Seribu " + ambilTeksAngkaMurni(angka - 1000);
+            if (angka < 1000000) return ambilTeksAngkaMurni(angka / 1000) + " Ribu " + ambilTeksAngkaMurni(angka % 1000);
+            if (angka < 1000000000) return ambilTeksAngkaMurni(angka / 1000000) + " Juta " + ambilTeksAngkaMurni(angka % 1000000);
+            if (angka < 1000000000000) return ambilTeksAngkaMurni(angka / 1000000000) + " Milyar " + ambilTeksAngkaMurni(angka % 1000000000);
+            return "";
+        }
+
+        function konversiAngkaKeTerbilang(totalBiaya) {
+            if (!totalBiaya || totalBiaya === 0) return "Nol Rupiah";
+            let stringMurni = ambilTeksAngkaMurni(totalBiaya);
+            
+            // Satukan kalimat dan tambahkan kata Rupiah satu kali di paling akhir objek string
+            stringMurni = stringMurni.replace(/\s+/g, ' ').trim();
+            return stringMurni + " Rupiah";
+        }
+
         // 1. AMBIL DATA DARI GOOGLE SPREADSHEET
         function muatDataDariSpreadsheet() {
             fetch(SHEETDB_API_URL)
@@ -240,16 +257,17 @@
                 return res.json();
             })
             .then(data => {
-                // Parsing ulang data json transaksional dari kolom 'datajson'
                 listDatabaseInvoice = data.map(row => JSON.parse(row.datajson));
                 renderDatabaseTable();
                 if(listDatabaseInvoice.length > 0) {
                     pilihDataUntukCetak(listDatabaseInvoice[listDatabaseInvoice.length - 1].noInvoice);
+                } else {
+                    bersihkanKertasInvoice();
                 }
             })
             .catch(err => {
                 console.error("Gagal menyinkronkan data:", err);
-                document.getElementById('database-rows').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600 italic">Gagal menyinkronkan database dengan Google Sheets. Periksa URL SheetDB Anda.</td></tr>`;
+                document.getElementById('database-rows').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600 italic">Gagal menyinkronkan database dengan Google Sheets.</td></tr>`;
             });
         }
 
@@ -265,22 +283,22 @@
             };
 
             if (isUpdate) {
-                // Modifikasi baris eksis berdasarkan kolom kunci 'noinvoice'
                 fetch(`${SHEETDB_API_URL}/noinvoice/${invoiceBaru.noInvoice}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ data: payload })
                 })
-                .then(() => renderDatabaseTable())
+                .then(res => res.json())
+                .then(() => muatDataDariSpreadsheet())
                 .catch(err => alert("Gagal memperbarui Spreadsheet: " + err));
             } else {
-                // Menambahkan baris data baru (POST)
                 fetch(SHEETDB_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ data: [payload] })
                 })
-                .then(() => renderDatabaseTable())
+                .then(res => res.json())
+                .then(() => muatDataDariSpreadsheet())
                 .catch(err => alert("Gagal menyimpan ke Spreadsheet: " + err));
             }
         }
@@ -288,10 +306,31 @@
         // 3. HAPUS BARIS DATA DARI GOOGLE SPREADSHEET
         function hapusDariSpreadsheet(noInvoice) {
             fetch(`${SHEETDB_API_URL}/noinvoice/${noInvoice}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
             })
-            .then(() => renderDatabaseTable())
+            .then(res => {
+                if (!res.ok) throw new Error("Gagal menghapus baris di server.");
+                return res.json();
+            })
+            .then(() => {
+                muatDataDariSpreadsheet();
+            })
             .catch(err => alert("Gagal menghapus dari Spreadsheet: " + err));
+        }
+
+        function bersihkanKertasInvoice() {
+            currentInvoiceData = null;
+            document.getElementById('pdf-inv-no').innerText = "-";
+            document.getElementById('pdf-cust-nama').innerText = "-";
+            document.getElementById('pdf-cust-hp').innerText = "-";
+            document.getElementById('pdf-cust-alamat').innerText = "-";
+            document.getElementById('pdf-inv-tgl').innerText = ": -";
+            document.getElementById('pdf-inv-tempo').innerText = ": -";
+            document.getElementById('pdf-inv-terbilang').innerText = `"Nol Rupiah"`;
+            document.getElementById('pdf-inv-total').innerText = "Rp. 0";
+            document.getElementById('pdf-table-body').innerHTML = "";
+            document.getElementById('invTerbilang').value = "Nol Rupiah";
         }
 
         function tambahItemBaris(desc = "", vol = "", harga = "", sub = "") {
@@ -312,6 +351,7 @@
                 </div>
             `;
             wrapper.appendChild(newRow);
+            rekapTotalSeketika();
         }
 
         function hapusBarisItem(button) {
@@ -328,6 +368,7 @@
             const subInput = rowElement.querySelector('.row-sub');
             const volAngka = parseFloat(volStr.replace(/[^0-9,.]/g, '').replace(',', '.')) || 0;
             subInput.value = volAngka > 0 ? Math.round(volAngka * harga) : 0;
+            rekapTotalSeketika();
         }
 
         function rekapTotalSeketika() {
@@ -336,9 +377,15 @@
             listBarisForm.forEach(row => {
                 total += parseFloat(row.querySelector('.row-sub').value) || 0;
             });
+
+            const teksTerbilang = konversiAngkaKeTerbilang(total);
+            document.getElementById('invTerbilang').value = teksTerbilang;
+
             if(currentInvoiceData) {
                 currentInvoiceData.total = total;
+                currentInvoiceData.terbilang = teksTerbilang;
                 document.getElementById('pdf-inv-total').innerText = "Rp. " + total.toLocaleString('id-ID');
+                document.getElementById('pdf-inv-terbilang').innerText = `"${teksTerbilang}"`;
             }
         }
 
@@ -386,6 +433,7 @@
             alert(`Invoice ${invoiceBaru.noInvoice} berhasil disinkronkan ke Google Sheets.`);
         }
 
+        // Cepat ubah status bayar via list database
         function toggleLiveStatus(noInvoice, currentStatus) {
             const newStatus = currentStatus === 'Lunas' ? 'Belum Lunas' : 'Lunas';
             const index = listDatabaseInvoice.findIndex(inv => inv.noInvoice === noInvoice);
@@ -422,6 +470,7 @@
             document.getElementById('pdf-inv-tempo').innerText = ": " + invoice.jatuhTempo;
             document.getElementById('pdf-inv-terbilang').innerText = `"${invoice.terbilang}"`;
             document.getElementById('pdf-inv-total').innerText = "Rp. " + invoice.total.toLocaleString('id-ID');
+            document.getElementById('invTerbilang').value = invoice.terbilang;
 
             const tbody = document.getElementById('pdf-table-body');
             tbody.innerHTML = "";
@@ -450,7 +499,9 @@
 
             const volAngka = parseFloat(currentInvoiceData.items[itemIdx].vol.replace(/[^0-9,.]/g, '').replace(',', '.')) || 0;
             currentInvoiceData.items[itemIdx].sub = Math.round(volAngka * currentInvoiceData.items[itemIdx].harga);
+            
             currentInvoiceData.total = currentInvoiceData.items.reduce((acc, item) => acc + item.sub, 0);
+            currentInvoiceData.terbilang = konversiAngkaKeTerbilang(currentInvoiceData.total);
 
             const dbIdx = listDatabaseInvoice.findIndex(inv => inv.noInvoice === currentInvoiceData.noInvoice);
             if(dbIdx !== -1) {
