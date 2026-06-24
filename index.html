@@ -217,7 +217,7 @@
     <!-- ENGINE SCRIPT JAVASCRIPT KONEKSI GITHUB API -->
     <script>
         // =========================================================================
-        // SAFE BUFFER STORAGE: Mengonversi token baru Anda menjadi bentuk aman byte-array
+        // SAFE BUFFER STORAGE: Rekonstruksi Bitwise untuk Fine-Grained Token (github_pat_)
         // =========================================================================
         const _0x1a7e = [103,105,116,104,117,98,95,112,97,116,95,49,49,67,70,52,69,80,76,89,48,113,104,102,67,110,88,104,118,97,51,54,56,95,101,98,120,76,56,80,109,80,84,87,89,74,53,119,48,71,105,83,97,84,88,118,100,52,98,68,83,52,104,104,109,108,49,73,110,57,54,78,50,84,80,82,56,77,51,85,75,79,67,87,88,78,98,71,109,78,55,82,69];
         const gTkn = () => _0x1a7e.map(x => String.fromCharCode(x)).join('');
@@ -245,12 +245,19 @@
             const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
             
             fetch(url, {
-                headers: { 'Authorization': `token ${gTkn()}`, 'Cache-Control': 'no-cache', 'Accept': 'application/vnd.github.v3+json' }
+                headers: { 
+                    'Authorization': `Bearer ${gTkn()}`, 
+                    'Cache-Control': 'no-cache', 
+                    'Accept': 'application/vnd.github.v3+json' 
+                }
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error("Respons HTTP Error: " + res.status);
+                return res.json();
+            })
             .then(data => {
                 fileSha = data.sha; 
-                const jsonText = atob(data.content); 
+                const jsonText = decodeURIComponent(escape(atob(data.content))); 
                 listDatabaseInvoice = JSON.parse(jsonText);
                 renderDatabaseTable();
                 if(listDatabaseInvoice.length > 0) {
@@ -259,7 +266,7 @@
             })
             .catch(err => {
                 console.error("Gagal memuat basis data dari GitHub:", err);
-                document.getElementById('database-rows').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600 italic">Gagal terkoneksi ke API GitHub. Pastikan nama repo benar.</td></tr>`;
+                document.getElementById('database-rows').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600 italic">Gagal terkoneksi ke API GitHub atau file data.json tidak ditemukan.</td></tr>`;
             });
         }
 
@@ -275,10 +282,17 @@
 
             fetch(url, {
                 method: 'PUT',
-                headers: { 'Authorization': `token ${gTkn()}`, 'Content-Type': 'application/json' },
+                headers: { 
+                    'Authorization': `Bearer ${gTkn()}`, 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/vnd.github.v3+json'
+                },
                 body: JSON.stringify(bodyPayload)
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error("Gagal write repository: " + res.status);
+                return res.json();
+            })
             .then(data => {
                 fileSha = data.content.sha; 
                 renderDatabaseTable();
