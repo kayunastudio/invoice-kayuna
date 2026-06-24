@@ -12,13 +12,21 @@
         
         /* CSS Cetak Khusus agar Ekspor PDF Berfungsi Sempurna */
         @media print {
-            body { background: white !important; }
+            /* Menghilangkan header (judul/tanggal) dan footer (link URL/situs) bawaan browser */
+            @page { 
+                margin: 0; 
+            }
+            body { 
+                background: white !important; 
+                margin: 0 !important;
+                padding: 0 !important;
+            }
             .no-print { display: none !important; }
             #invoice-paper { 
                 margin: 0 !important; 
                 border: none !important; 
                 box-shadow: none !important; 
-                padding: 10mm 10mm !important; 
+                padding: 20mm 20mm !important; 
                 width: 100% !important; 
                 min-height: auto !important; 
             }
@@ -38,7 +46,7 @@
                 <button onclick="muatDataDariSpreadsheet()" class="bg-[#B45309] hover:bg-[#92400E] text-white font-semibold px-4 py-2 rounded-lg shadow-md transition text-sm flex items-center gap-1">
                     🔄 Sinkron Spreadsheet
                 </button>
-                <button onclick="window.print()" class="bg-[#78350F] hover:bg-[#451A03] text-white font-semibold px-6 py-2.5 rounded-lg shadow-md transition duration-200 flex items-center gap-2 text-sm">
+                <button onclick="pemicuCetakPdfDinamis()" class="bg-[#78350F] hover:bg-[#451A03] text-white font-semibold px-6 py-2.5 rounded-lg shadow-md transition duration-200 flex items-center gap-2 text-sm">
                     🖨️ Ekspor ke PDF
                 </button>
             </div>
@@ -51,7 +59,7 @@
                     <div class="grid grid-cols-3 gap-2 mb-4">
                         <div class="col-span-2">
                             <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">No. Invoice</label>
-                            <input type="text" id="invNo" required value="26153-001" class="w-full border border-[#D5C3B3] p-2 rounded focus:outline-none focus:border-[#78350F] bg-white">
+                            <input type="text" id="invNo" required placeholder="No. Invoice" value="" class="w-full border border-[#D5C3B3] p-2 rounded focus:outline-none focus:border-[#78350F] bg-white">
                         </div>
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Status</label>
@@ -73,9 +81,9 @@
                     </div>
 
                     <h3 class="text-sm font-bold text-[#78350F] mt-6 mb-2">Data Pelanggan</h3>
-                    <div class="mb-2"><input type="text" id="custNama" required placeholder="Nama Klien" value="Neta Pirawan" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></div>
-                    <div class="mb-2"><input type="text" id="custHp" required placeholder="No. HP" value="0813-2042-2190" class="w-full border p-2 rounded text-sm bg-white"></div>
-                    <div class="mb-4"><textarea id="custAlamat" required placeholder="Alamat" rows="2" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white">Jl. Sriwijaya, Kota Bandung, Jawa Barat</textarea></div>
+                    <div class="mb-2"><input type="text" id="custNama" required placeholder="Nama Klien" value="" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></div>
+                    <div class="mb-2"><input type="text" id="custHp" required placeholder="No. HP" value="" class="w-full border p-2 rounded text-sm bg-white"></div>
+                    <div class="mb-4"><textarea id="custAlamat" required placeholder="Alamat" rows="2" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></textarea></div>
 
                     <h3 class="text-sm font-bold text-[#78350F] mt-6 mb-2 flex justify-between items-center">
                         <span>Daftar Transaksi</span>
@@ -211,12 +219,11 @@
         let currentInvoiceData = null;
 
         document.addEventListener("DOMContentLoaded", () => {
-            // Mengatur input tanggal form ke hari ini secara otomatis saat pertama dibuka
             const hariIni = new Date().toISOString().split('T')[0];
             document.getElementById('invTgl').value = hariIni;
             document.getElementById('invTempo').value = hariIni;
 
-            tambahItemBaris("Interior Ruang Kerja", "14,44 m2", 40000, 577000);
+            tambahItemBaris("Deskripsi Jasa/ Barang", "Vol", 0, 577000);
             muatDataDariSpreadsheet();
 
             document.getElementById('wrapper-item-transaksi').addEventListener('input', (e) => {
@@ -227,12 +234,39 @@
         });
 
         // =========================================================================
+        // HUBUNGAN KONTROL EXPORT PDF DINAMIS (PENAMAAN FILE OTOMATIS)
+        // =========================================================================
+        function pemicuCetakPdfDinamis() {
+            // Ambil nomor invoice aktif yang sedang ditampilkan di kertas cetak
+            const nomorFaktur = document.getElementById('pdf-inv-no').innerText.trim();
+            const namaKlien = document.getElementById('pdf-cust-nama').innerText.trim();
+            
+            // Simpan judul halaman asli untuk di-restore nanti
+            const judulAsliHalaman = document.title;
+
+            // Jika nomor faktur valid, ubah title dokumen sementara agar menjadi nama file PDF
+            if (nomorFaktur && nomorFaktur !== "-") {
+                document.title = `Invoice_${nomorFaktur}_${namaKlien.replace(/\s+/g, '_')}`;
+            } else {
+                document.title = `Invoice_Kayuna_Studio`;
+            }
+
+            // Panggil fungsi cetak bawaan browser
+            window.print();
+
+            // Kembalikan judul halaman dasbor ke aslinya setelah dialog cetak selesai
+            setTimeout(() => {
+                document.title = judulAsliHalaman;
+            }, 1000);
+        }
+
+        // =========================================================================
         // ALGORITMA KONVERSI TANGGAL SISTEM KE TEKS BAHASA INDONESIA
         // =========================================================================
         function formatTanggalIndonesia(stringTanggal) {
             if (!stringTanggal) return "-";
             const parts = stringTanggal.split('-');
-            if (parts.length !== 3) return stringTanggal; // Jaga-jaga jika format data lama berbentuk teks bebas
+            if (parts.length !== 3) return stringTanggal;
 
             const tahun = parts[0];
             const bulanIndex = parseInt(parts[1], 10) - 1;
@@ -431,8 +465,8 @@
             const invoiceBaru = {
                 noInvoice: document.getElementById('invNo').value,
                 status: document.getElementById('invStatus').value,
-                tanggal: document.getElementById('invTgl').value,      // Menyimpan format YYYY-MM-DD
-                jatuhTempo: document.getElementById('invTempo').value,  // Menyimpan format YYYY-MM-DD
+                tanggal: document.getElementById('invTgl').value,
+                jatuhTempo: document.getElementById('invTempo').value,
                 pelanggan: {
                     nama: document.getElementById('custNama').value,
                     hp: document.getElementById('custHp').value,
@@ -475,6 +509,7 @@
             }
         }
 
+        // Pilihan Cetak via tabel database cloud
         function pilihDataUntukCetak(noInvoice) {
             const target = listDatabaseInvoice.find(inv => inv.noInvoice === noInvoice);
             if(target) {
@@ -489,11 +524,9 @@
             document.getElementById('pdf-cust-hp').innerText = invoice.pelanggan.hp;
             document.getElementById('pdf-cust-alamat').innerText = invoice.pelanggan.alamat;
             
-            // Konversi nilai sistem ke format teks tanggal Indonesia saat cetak ke kertas A4
             document.getElementById('pdf-inv-tgl').innerText = ": " + formatTanggalIndonesia(invoice.tanggal);
             document.getElementById('pdf-inv-tempo').innerText = ": " + formatTanggalIndonesia(invoice.jatuhTempo);
             
-            // Kembalikan nilai ke form input
             document.getElementById('invTgl').value = invoice.tanggal;
             document.getElementById('invTempo').value = invoice.jatuhTempo;
             document.getElementById('invStatus').value = invoice.status;
