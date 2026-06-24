@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Invoice - Kayuna Studio</title>
+    <title>Sistem Invoice & Database GitHub - Kayuna Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         #invoice-paper { width: 210mm; min-height: 297mm; box-sizing: border-box; }
@@ -111,7 +111,7 @@
                                 </tr>
                             </thead>
                             <tbody id="database-rows" class="divide-y text-gray-700">
-                                <tr><td colspan="6" class="p-4 text-center text-gray-400 italic">Memuat basis data dari GitHub...</td></tr>
+                                <tr><td colspan="6" class="p-4 text-center text-gray-400 italic">Memuat basis data dari Cloud Proxy...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -205,16 +205,6 @@
     </div>
 
     <script>
-        // =========================================================================
-        // REKONSTRUKSI TOKEN AMAN SENSITIF HURUF (Fine-Grained Token Protocol)
-        // =========================================================================
-        const _0x1a7e = [103,105,116,104,117,98,95,112,97,116,95,49,49,67,70,52,69,80,76,89,48,113,104,102,67,110,88,104,118,97,51,54,56,95,101,98,120,76,56,80,109,80,84,87,89,74,53,119,48,71,105,83,97,84,88,118,100,52,98,68,83,52,104,104,109,108,49,73,110,57,54,78,50,84,80,82,56,77,51,85,75,79,67,87,88,78,98,71,109,78,55,82,69];
-        const gTkn = () => _0x1a7e.map(x => String.fromCharCode(x)).join('');
-
-        const REPO_OWNER = 'kayunastudio';              
-        const REPO_NAME = 'database-invoice-kayuna';                   
-        const FILE_PATH = 'data.json';                          
-
         let listDatabaseInvoice = [];
         let fileSha = ""; 
         let currentInvoiceData = null;
@@ -230,19 +220,14 @@
             });
         });
 
+        // Memanggil API lokal Cloudflare Pages Reverse Proxy yang aman bebas hambatan CORS
         function muatDataDariGitHub() {
-            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-            
-            fetch(url, {
+            fetch('/api/database', {
                 method: 'GET',
-                headers: { 
-                    'Authorization': `Bearer ${gTkn()}`, 
-                    'Cache-Control': 'no-cache', 
-                    'Accept': 'application/vnd.github.v3+json' 
-                }
+                headers: { 'Cache-Control': 'no-cache' }
             })
             .then(res => {
-                if (!res.ok) throw new Error("HTTP Error status: " + res.status);
+                if (!res.ok) throw new Error("Cloudflare Proxy returned status HTTP: " + res.status);
                 return res.json();
             })
             .then(data => {
@@ -255,13 +240,12 @@
                 }
             })
             .catch(err => {
-                console.error("Gagal memuat basis data dari GitHub:", err);
-                document.getElementById('database-rows').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600 italic">Gagal terkoneksi ke API GitHub atau berkas data.json tidak terbaca.</td></tr>`;
+                console.error("Error pada sisi internal Pages Proxy Handler:", err);
+                document.getElementById('database-rows').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600 italic">Gagal menyinkronkan database via Cloudflare Proxy Server. Pastikan folder /functions/api/database.js telah di-push.</td></tr>`;
             });
         }
 
         function simpanKeDatabaseGitHub(pesanCommit) {
-            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
             const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(listDatabaseInvoice, null, 2))));
 
             const bodyPayload = {
@@ -270,24 +254,20 @@
                 sha: fileSha
             };
 
-            fetch(url, {
+            fetch('/api/database', {
                 method: 'PUT',
-                headers: { 
-                    'Authorization': `Bearer ${gTkn()}`, 
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/vnd.github.v3+json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(bodyPayload)
             })
             .then(res => {
-                if (!res.ok) throw new Error("Gagal write repository: " + res.status);
+                if (!res.ok) throw new Error("Gagal write repository via proxy: " + res.status);
                 return res.json();
             })
             .then(data => {
                 fileSha = data.content.sha; 
                 renderDatabaseTable();
             })
-            .catch(err => alert("Gagal menyimpan ke GitHub: " + err));
+            .catch(err => alert("Gagal memperbarui database: " + err));
         }
 
         function tambahItemBaris(desc = "", vol = "", harga = "", sub = "") {
@@ -378,7 +358,7 @@
 
             renderLembarKertasCetak(invoiceBaru);
             simpanKeDatabaseGitHub(`Tambah/Update Faktur No: ${invoiceBaru.noInvoice}`);
-            alert(`Invoice ${invoiceBaru.noInvoice} berhasil diproses dan disinkronkan ke GitHub.`);
+            alert(`Invoice ${invoiceBaru.noInvoice} berhasil diproses.`);
         }
 
         function toggleLiveStatus(noInvoice, currentStatus) {
