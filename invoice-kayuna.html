@@ -9,17 +9,26 @@
         #invoice-paper { width: 210mm; min-height: 297mm; box-sizing: border-box; }
         .inv-editable-input { background: transparent; border: none; width: 100%; text-align: inherit; font-family: inherit; font-size: inherit; color: inherit; font-weight: inherit; }
         .inv-editable-input:focus { background: rgba(244, 234, 230, 0.5); outline: 1px dashed #A16207; }
+        
+        /* CSS Cetak Khusus agar Ekspor PDF Berfungsi Sempurna */
         @media print {
-            body { background: white; }
+            body { background: white !important; }
             .no-print { display: none !important; }
-            #invoice-paper { margin: 0 !important; border: none !important; box-shadow: none !important; padding: 15mm 15mm !important; width: 100% !important; min-height: auto !important; }
+            #invoice-paper { 
+                margin: 0 !important; 
+                border: none !important; 
+                box-shadow: none !important; 
+                padding: 10mm 10mm !important; 
+                width: 100% !important; 
+                min-height: auto !important; 
+            }
             .inv-editable-input { outline: none !important; }
         }
     </style>
 </head>
 <body class="bg-[#FDFBF7] text-gray-800 min-h-screen font-sans">
 
-    <!-- PANEL UTAMA DASHBOARD (TEMA COKELAT KAYU MUDA) -->
+    <!-- PANEL UTAMA DASHBOARD -->
     <div class="container mx-auto p-6 max-w-7xl no-print">
         <header class="flex justify-between items-center mb-8 border-b-2 border-[#D97706] pb-4">
             <div>
@@ -38,7 +47,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- PANEL KIRI: INPUT FORM -->
-            <div class="bg-[#F5EBE0] p-6 rounded-xl shadow-md lg:col-span-1 h-fit border border border-[#E3D5CA]">
+            <div class="bg-[#F5EBE0] p-6 rounded-xl shadow-md lg:col-span-1 h-fit border border-[#E3D5CA]">
                 <h2 class="text-xl font-bold text-[#78350F] mb-4 border-b border-[#E3D5CA] pb-2">1. Input Parameter Dokumen</h2>
                 <form id="invoiceForm" onsubmit="event.preventDefault(); prosesDataInvoice();">
                     <div class="grid grid-cols-3 gap-2 mb-4">
@@ -97,6 +106,7 @@
                         <table class="w-full text-left border-collapse text-sm mb-4">
                             <thead>
                                 <tr class="bg-[#F5EBE0] text-[#78350F] font-bold border-b border-[#E3D5CA]">
+                                    <th class="p-3 text-center w-16">Pilih</th>
                                     <th class="p-3">No. Invoice</th>
                                     <th class="p-3">Pelanggan</th>
                                     <th class="p-3">Nilai Total</th>
@@ -105,7 +115,7 @@
                                 </tr>
                             </thead>
                             <tbody id="database-rows" class="divide-y text-gray-700">
-                                <tr><td colspan="5" class="p-4 text-center text-gray-400 italic">Memuat basis data dari GitHub...</td></tr>
+                                <tr><td colspan="6" class="p-4 text-center text-gray-400 italic">Memuat basis data dari GitHub...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -114,7 +124,7 @@
         </div>
     </div>
 
-    <!-- TAMPILAN KERTAS INVOICE ASLI (SEKARANG TEMA COKELAT KAYU MUDA) -->
+    <!-- TAMPILAN KERTAS INVOICE ASLI -->
     <div class="w-full flex justify-center py-4 bg-gray-200 print:bg-white print:py-0">
         <div id="invoice-paper" class="bg-white p-[20mm] border border-gray-300 shadow-xl print:shadow-none print:border-none relative flex flex-col justify-between text-black text-sm leading-relaxed">
             <div>
@@ -206,19 +216,16 @@
 
     <!-- ENGINE SCRIPT JAVASCRIPT KONEKSI GITHUB API -->
     <script>
-        // ==========================================
-        //  MASUKKAN KONFIGURASI GITHUB ANDA DI SINI
-        // ==========================================
-        const GITHUB_TOKEN = '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'; 
+        const GITHUB_TOKEN = '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'; 
         const REPO_OWNER = 'kayunastudio';              
         const REPO_NAME = 'database-invoice-kayuna';                   
         const FILE_PATH = 'data.json';                          
 
         let listDatabaseInvoice = [];
         let fileSha = ""; 
+        let currentInvoiceData = null;
 
         document.addEventListener("DOMContentLoaded", () => {
-            // Pasang baris sampel default pertama kali
             tambahItemBaris("Interior Ruang Kerja", "14,44 m2", 40000, 577000);
             muatDataDariGitHub();
 
@@ -231,14 +238,14 @@
 
         function muatDataDariGitHub() {
             if(GITHUB_TOKEN === 'TEMPEL_TOKEN_GITHUB_ANDA_DISINI' || REPO_OWNER === 'USERNAME_GITHUB_ANDA') {
-                document.getElementById('database-rows').innerHTML = `<tr><td colspan="5" class="p-4 text-center text-amber-700 bg-amber-50 font-medium border border-amber-200 rounded-lg">⚠️ Silakan konfigurasi Token & Nama Repository GitHub Anda di dalam baris kode script!</td></tr>`;
+                document.getElementById('database-rows').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-amber-700 bg-amber-50 font-medium border border-amber-200 rounded-lg">⚠️ Silakan konfigurasi Token & Nama Repository GitHub Anda di dalam baris kode script!</td></tr>`;
                 return;
             }
 
             const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
             
             fetch(url, {
-                headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Cache-Control': 'no-cache', 'Accept': 'application/vnd.github.v3+json' }
             })
             .then(res => res.json())
             .then(data => {
@@ -247,12 +254,13 @@
                 listDatabaseInvoice = JSON.parse(jsonText);
                 renderDatabaseTable();
                 if(listDatabaseInvoice.length > 0) {
-                    renderLembarKertasCetak(listDatabaseInvoice[listDatabaseInvoice.length - 1]);
+                    // Secara default memuat data terakhir ke lembar cetak
+                    pilihDataUntukCetak(listDatabaseInvoice[listDatabaseInvoice.length - 1].noInvoice);
                 }
             })
             .catch(err => {
                 console.error("Gagal memuat basis data dari GitHub:", err);
-                document.getElementById('database-rows').innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-600 italic">Gagal terkoneksi ke API GitHub. Pastikan token & nama repo benar.</td></tr>`;
+                document.getElementById('database-rows').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600 italic">Gagal terkoneksi ke API GitHub. Pastikan token & nama repo benar.</td></tr>`;
             });
         }
 
@@ -279,7 +287,6 @@
             .catch(err => alert("Gagal menyimpan ke GitHub: " + err));
         }
 
-        // Fitur Tambah baris transaksi lengkap dengan tombol hapus terintegrasi
         function tambahItemBaris(desc = "", vol = "", harga = "", sub = "") {
             const wrapper = document.getElementById('wrapper-item-transaksi');
             const newRow = document.createElement('div');
@@ -301,15 +308,10 @@
         }
 
         function hapusBarisItem(button) {
-            const wrapper = document.getElementById('wrapper-item-transaksi');
             button.closest('.item-row').remove();
-            
-            // Jika baris habis, otomatis buatkan satu baris kosong agar form tidak bolong
-            if (wrapper.children.length === 0) {
+            if (document.getElementById('wrapper-item-transaksi').children.length === 0) {
                 tambahItemBaris();
             }
-            
-            // Hitung ulang nominal invoice setelah baris dikurangi
             rekapTotalSeketika();
         }
 
@@ -333,7 +335,6 @@
             }
         }
 
-        let currentInvoiceData = null;
         function prosesDataInvoice() {
             const listBarisForm = document.querySelectorAll('.item-row');
             let items = [];
@@ -350,7 +351,7 @@
                 }
             });
 
-            currentInvoiceData = {
+            const invoiceBaru = {
                 noInvoice: document.getElementById('invNo').value,
                 status: document.getElementById('invStatus').value,
                 tanggal: document.getElementById('invTgl').value,
@@ -365,16 +366,16 @@
                 terbilang: document.getElementById('invTerbilang').value
             };
 
-            const indexEksis = listDatabaseInvoice.findIndex(inv => inv.noInvoice === currentInvoiceData.noInvoice);
+            const indexEksis = listDatabaseInvoice.findIndex(inv => inv.noInvoice === invoiceBaru.noInvoice);
             if (indexEksis !== -1) {
-                listDatabaseInvoice[indexEksis] = currentInvoiceData;
+                listDatabaseInvoice[indexEksis] = invoiceBaru;
             } else {
-                listDatabaseInvoice.push(currentInvoiceData);
+                listDatabaseInvoice.push(invoiceBaru);
             }
 
-            renderLembarKertasCetak(currentInvoiceData);
-            simpanKeDatabaseGitHub(`Tambah/Update Faktur No: ${currentInvoiceData.noInvoice}`);
-            alert(`Invoice ${currentInvoiceData.noInvoice} berhasil diproses.`);
+            renderLembarKertasCetak(invoiceBaru);
+            simpanKeDatabaseGitHub(`Tambah/Update Faktur No: ${invoiceBaru.noInvoice}`);
+            alert(`Invoice ${invoiceBaru.noInvoice} berhasil diproses dan disinkronkan ke GitHub.`);
         }
 
         function toggleLiveStatus(noInvoice, currentStatus) {
@@ -389,6 +390,21 @@
             }
         }
 
+        function hapusFakturDariDb(noInvoice) {
+            if(confirm(`Apakah Anda yakin ingin menghapus Invoice No: ${noInvoice} dari database GitHub?`)) {
+                listDatabaseInvoice = listDatabaseInvoice.filter(inv => inv.noInvoice !== noInvoice);
+                simpanKeDatabaseGitHub(`Hapus Faktur No: ${noInvoice}`);
+            }
+        }
+
+        // Fungsi khusus untuk memilih data mana yang akan dikirim ke preview cetak PDF
+        function pilihDataUntukCetak(noInvoice) {
+            const target = listDatabaseInvoice.find(inv => inv.noInvoice === noInvoice);
+            if(target) {
+                renderLembarKertasCetak(target);
+            }
+        }
+
         function renderLembarKertasCetak(invoice) {
             currentInvoiceData = invoice;
             document.getElementById('pdf-inv-no').innerText = invoice.noInvoice;
@@ -399,7 +415,6 @@
             document.getElementById('pdf-inv-tempo').innerText = ": " + invoice.jatuhTempo;
             document.getElementById('pdf-inv-terbilang').innerText = `"${invoice.terbilang}"`;
             document.getElementById('pdf-inv-total').innerText = "Rp. " + invoice.total.toLocaleString('id-ID');
-            document.getElementById('invStatus').value = invoice.status || "Belum Lunas";
 
             const tbody = document.getElementById('pdf-table-body');
             tbody.innerHTML = "";
@@ -413,6 +428,12 @@
                     <td class="p-3 border-b border-gray-100 text-right font-bold">Rp. ${item.sub.toLocaleString('id-ID')}</td>
                 `;
                 tbody.appendChild(tr);
+            });
+
+            // Sinkronkan tanda pilihan radio button di tabel agar sesuai dengan yang sedang aktif dicetak
+            const rButtons = document.querySelectorAll('.print-selector');
+            rButtons.forEach(rb => {
+                rb.checked = (rb.value === invoice.noInvoice);
             });
         }
 
@@ -435,20 +456,26 @@
             const tbody = document.getElementById('database-rows');
             tbody.innerHTML = "";
             if(listDatabaseInvoice.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400 italic">Belum ada invoice yang tercatat.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400 italic">Belum ada invoice yang tercatat.</td></tr>`;
                 return;
             }
 
-            listDatabaseInvoice.forEach(invoice => {
+            listDatabaseInvoice.forEach((invoice, idx) => {
                 const statusStr = invoice.status || "Belum Lunas";
                 const isLunas = statusStr === "Lunas";
                 const badgeClass = isLunas 
                     ? "bg-emerald-100 text-emerald-800 border-emerald-200" 
                     : "bg-amber-100 text-amber-800 border-amber-200";
 
+                // Memastikan check status pada data aktif yang sedang di-load kertas cetak
+                const isChecked = (currentInvoiceData && currentInvoiceData.noInvoice === invoice.noInvoice) ? "checked" : "";
+
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-[#F5EBE0]/30 border-b border-gray-100 text-xs";
                 tr.innerHTML = `
+                    <td class="p-3 text-center">
+                        <input type="radio" name="printData" value="${invoice.noInvoice}" ${isChecked} onchange="pilihDataUntukCetak(this.value)" class="print-selector h-4 w-4 text-[#78350F] focus:ring-[#78350F] border-gray-300 cursor-pointer">
+                    </td>
                     <td class="p-3 font-bold text-[#78350F]">${invoice.noInvoice}</td>
                     <td class="p-3">
                         <div class="font-semibold text-gray-900">${invoice.pelanggan.nama}</div>
@@ -461,7 +488,10 @@
                         </button>
                     </td>
                     <td class="p-3 text-center">
-                        <button onclick="bukaFakturDariDb('${invoice.noInvoice}')" class="bg-[#78350F] text-white py-1 px-3 rounded text-[11px] font-semibold hover:bg-[#451A03]">Buka</button>
+                        <div class="flex justify-center gap-1">
+                            <button onclick="bukaFakturDariDb('${invoice.noInvoice}')" class="bg-[#78350F] text-white py-1 px-2.5 rounded text-[11px] font-semibold hover:bg-[#451A03]">Buka / Edit</button>
+                            <button onclick="hapusFakturDariDb('${invoice.noInvoice}')" class="bg-rose-50 text-rose-600 border border-rose-200 py-1 px-2.5 rounded text-[11px] font-semibold hover:bg-rose-100">Hapus</button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
