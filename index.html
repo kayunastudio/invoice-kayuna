@@ -65,7 +65,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Status</label>
-                                <select id="invStatus" class="w-full border border-[#D5C3B3] p-2 rounded focus:outline-none focus:border-[#78350F] bg-white font-semibold text-sm">
+                                <select id="invStatus" onchange="perbaruiStatusStempelLive(this.value)" class="w-full border border-[#D5C3B3] p-2 rounded focus:outline-none focus:border-[#78350F] bg-white font-semibold text-sm">
                                     <option value="Belum Lunas" class="text-amber-700 font-bold">❌ Belum Lunas</option>
                                     <option value="Lunas" class="text-emerald-700 font-bold">✅ Lunas</option>
                                 </select>
@@ -152,6 +152,12 @@
     <!-- TAMPILAN KERTAS INVOICE ASLI -->
     <div class="w-full flex justify-center py-4 bg-gray-200 print:bg-white print:py-0">
         <div id="invoice-paper" class="bg-white p-[20mm] border border-gray-300 shadow-xl print:shadow-none print:border-none relative flex flex-col justify-between text-black text-sm leading-relaxed">
+            
+            <!-- SEKSI BARU: ELEMEN STEMPEL LUNAS KONDISIONAL -->
+            <div id="pdf-stamp-lunas" class="absolute top-[50mm] right-[25mm] border-4 border-emerald-600 text-emerald-600 font-black text-xl tracking-[0.2em] px-4 py-1.5 rounded-md uppercase font-sans select-none -rotate-12 opacity-85 pointer-events-none hidden bg-white/40 shadow-sm">
+                Lunas
+            </div>
+
             <div>
                 <!-- Header Banner -->
                 <div class="flex justify-between items-start mb-10">
@@ -203,7 +209,6 @@
                     <div class="max-w-[55%]">
                         <h4 class="text-[10px] font-bold uppercase text-gray-400 mb-1">Terbilang Sisa Pelunasan:</h4>
                         <p id="pdf-inv-terbilang" class="italic font-medium text-[#78350F] text-xs">"Nol Rupiah"</p>
-                        <!-- NOTE: Area Informasi Detail DP yang Akan Muncul di Kertas Cetak A4/PDF -->
                         <div id="pdf-dp-info-block" class="mt-2 text-[11px] text-gray-600 print:block hidden">
                             * Telah dibayarkan uang muka (DP) pada tanggal <span id="pdf-dp-tgl-text" class="font-semibold text-gray-800">-</span>
                         </div>
@@ -267,15 +272,27 @@
         });
 
         // =========================================================================
+        // KONTROL LIVE UPDATE VISIBILITAS STEMPEL LUNAS
+        // =========================================================================
+        function perbaruiStatusStempelLive(statusVal) {
+            const stempelElement = document.getElementById('pdf-stamp-lunas');
+            if (statusVal === 'Lunas') {
+                stempelElement.classList.remove('hidden');
+            } else {
+                stempelElement.classList.add('hidden');
+            }
+            if(currentInvoiceData) {
+                currentInvoiceData.status = statusVal;
+            }
+        }
+
+        // =========================================================================
         // KONTROL AUTO JATUH TEMPO (+2 HARI DARI TANGGAL INVOICE)
         // =========================================================================
         function hitungOtomatisJatuhTempo(stringTanggalInvoice) {
             if (!stringTanggalInvoice) return;
             const dateObj = new Date(stringTanggalInvoice);
-            
-            // Tambahkan jangka waktu 2 hari secara otomatis
             dateObj.setDate(dateObj.getDate() + 2);
-            
             const formatYmd = dateObj.toISOString().split('T')[0];
             document.getElementById('invTempo').value = formatYmd;
         }
@@ -431,6 +448,7 @@
 
         function bersihkanKertasInvoice(manualClear = false) {
             currentInvoiceData = null;
+            document.getElementById('pdf-stamp-lunas').classList.add('hidden');
             document.getElementById('pdf-inv-no').innerText = "-";
             document.getElementById('pdf-cust-nama').innerText = "-";
             document.getElementById('pdf-cust-hp').innerText = "-";
@@ -490,7 +508,6 @@
             rekapTotalSeketika();
         }
 
-        // REKAP UTAMA DENGAN KALKULASI DONGKRAK NILAI DP
         function rekapTotalSeketika() {
             const listBarisForm = document.querySelectorAll('.item-row');
             let subtotalPekerjaan = 0;
@@ -498,14 +515,12 @@
                 subtotalPekerjaan += parseFloat(row.querySelector('.row-sub').value) || 0;
             });
 
-            // Ambil parameter nominal DP dari form input
             const nominalDp = parseFloat(document.getElementById('invDpNominal').value) || 0;
             const sisaPelunasan = subtotalPekerjaan - nominalDp;
 
             const teksTerbilang = konversiAngkaKeTerbilang(sisaPelunasan);
             document.getElementById('invTerbilang').value = teksTerbilang;
 
-            // Transfusi data live ke preview cetak
             document.getElementById('pdf-subtotal-raw').innerText = "Rp. " + subtotalPekerjaan.toLocaleString('id-ID');
             
             if (nominalDp > 0) {
@@ -593,6 +608,7 @@
                 listDatabaseInvoice[index].status = newStatus;
                 if(currentInvoiceData && currentInvoiceData.noInvoice === noInvoice) {
                     document.getElementById('invStatus').value = newStatus;
+                    perbaruiStatusStempelLive(newStatus);
                 }
                 kirimKeSpreadsheetProxy(listDatabaseInvoice[index], true);
             }
@@ -622,7 +638,6 @@
             document.getElementById('pdf-inv-tgl').innerText = ": " + formatTanggalIndonesia(invoice.tanggal);
             document.getElementById('pdf-inv-tempo').innerText = ": " + formatTanggalIndonesia(invoice.jatuhTempo);
             
-            // Pengembalian parameter ke formulir input
             document.getElementById('invNo').value = invoice.noInvoice;
             document.getElementById('invTgl').value = invoice.tanggal;
             document.getElementById('invTempo').value = invoice.jatuhTempo;
@@ -633,7 +648,9 @@
             document.getElementById('custHp').value = invoice.pelanggan.hp;
             document.getElementById('custAlamat').value = invoice.pelanggan.alamat;
 
-            // Rincian Kalkulasi Cetak A4
+            // Update status stempel
+            perbaruiStatusStempelLive(invoice.status);
+
             const subtotalVal = invoice.subtotal || invoice.total || 0;
             const dpVal = invoice.dpNominal || 0;
             
