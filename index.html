@@ -52,75 +52,79 @@
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="bg-[#F5EBE0] p-6 rounded-xl shadow-md lg:col-span-1 h-fit border border-[#E3D5CA]">
-                <h2 class="text-xl font-bold text-[#78350F] mb-4 border-b border-[#E3D5CA] pb-2">1. Input Parameter Dokumen</h2>
-                <form id="invoiceForm" onsubmit="event.preventDefault(); prosesDataInvoice();">
-                    <div class="grid grid-cols-3 gap-2 mb-4">
-                        <div class="col-span-2">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">No. Invoice</label>
-                            <input type="text" id="invNo" required placeholder="Contoh: 26153-001" class="w-full border border-[#D5C3B3] p-2 rounded focus:outline-none focus:border-[#78350F] bg-white">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+            <div class="bg-[#F5EBE0] p-6 rounded-xl shadow-md lg:col-span-1 border border-[#E3D5CA] flex flex-col justify-between h-full">
+                <div>
+                    <h2 class="text-xl font-bold text-[#78350F] mb-4 border-b border-[#E3D5CA] pb-2">1. Input Parameter Dokumen</h2>
+                    <form id="invoiceForm" onsubmit="event.preventDefault(); prosesDataInvoice();">
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            <div class="col-span-2">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">No. Invoice</label>
+                                <input type="text" id="invNo" required placeholder="Contoh: 26153-001" class="w-full border border-[#D5C3B3] p-2 rounded focus:outline-none focus:border-[#78350F] bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Status</label>
+                                <select id="invStatus" class="w-full border border-[#D5C3B3] p-2 rounded focus:outline-none focus:border-[#78350F] bg-white font-semibold text-sm">
+                                    <option value="Belum Lunas" class="text-amber-700 font-bold">❌ Belum Lunas</option>
+                                    <option value="Lunas" class="text-emerald-700 font-bold">✅ Lunas</option>
+                                </select>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Status</label>
-                            <select id="invStatus" class="w-full border border-[#D5C3B3] p-2 rounded focus:outline-none focus:border-[#78350F] bg-white font-semibold text-sm">
-                                <option value="Belum Lunas" class="text-amber-700 font-bold">❌ Belum Lunas</option>
-                                <option value="Lunas" class="text-emerald-700 font-bold">✅ Lunas</option>
-                            </select>
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Tanggal</label>
+                                <input type="date" id="invTgl" required class="w-full border border-[#D5C3B3] p-2 rounded text-sm focus:outline-none focus:border-[#78350F] bg-white text-gray-700">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Jatuh Tempo</label>
+                                <input type="date" id="invTempo" required class="w-full border border-[#D5C3B3] p-2 rounded text-sm focus:outline-none focus:border-[#78350F] bg-white text-gray-700">
+                            </div>
                         </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 mb-4">
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Tanggal</label>
-                            <input type="date" id="invTgl" required class="w-full border border-[#D5C3B3] p-2 rounded text-sm focus:outline-none focus:border-[#78350F] bg-white text-gray-700">
+
+                        <h3 class="text-sm font-bold text-[#78350F] mt-6 mb-2">Data Pelanggan</h3>
+                        <div class="mb-2"><input type="text" id="custNama" required placeholder="Nama Klien / Instansi" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></div>
+                        <div class="mb-2"><input type="text" id="custHp" required placeholder="No. Handphone" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></div>
+                        <div class="mb-4"><textarea id="custAlamat" required placeholder="Alamat lengkap tujuan invoice..." rows="2" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></textarea></div>
+
+                        <h3 class="text-sm font-bold text-[#78350F] mt-6 mb-2 flex justify-between items-center">
+                            <span>Daftar Transaksi</span>
+                            <button type="button" onclick="tambahItemBaris()" class="text-xs bg-[#E3D5CA] text-[#78350F] px-2 py-1 rounded font-bold hover:bg-[#D5C3B3]">+ Tambah</button>
+                        </h3>
+                        <div id="wrapper-item-transaksi" class="space-y-3 mb-4">
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Jatuh Tempo</label>
-                            <input type="date" id="invTempo" required class="w-full border border-[#D5C3B3] p-2 rounded text-sm focus:outline-none focus:border-[#78350F] bg-white text-gray-700">
+
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Terbilang Rupiah (Otomatis)</label>
+                            <input type="text" id="invTerbilang" readonly required value="Nol Rupiah" class="w-full border border-gray-300 p-2 rounded text-sm bg-gray-100 font-medium text-gray-700 focus:outline-none">
                         </div>
-                    </div>
 
-                    <h3 class="text-sm font-bold text-[#78350F] mt-6 mb-2">Data Pelanggan</h3>
-                    <div class="mb-2"><input type="text" id="custNama" required placeholder="Nama Klien / Instansi" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></div>
-                    <div class="mb-2"><input type="text" id="custHp" required placeholder="No. Handphone" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></div>
-                    <div class="mb-4"><textarea id="custAlamat" required placeholder="Alamat lengkap tujuan invoice..." rows="2" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></textarea></div>
-
-                    <h3 class="text-sm font-bold text-[#78350F] mt-6 mb-2 flex justify-between items-center">
-                        <span>Daftar Transaksi</span>
-                        <button type="button" onclick="tambahItemBaris()" class="text-xs bg-[#E3D5CA] text-[#78350F] px-2 py-1 rounded font-bold hover:bg-[#D5C3B3]">+ Tambah</button>
-                    </h3>
-                    <div id="wrapper-item-transaksi" class="space-y-3 mb-4">
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Terbilang Rupiah (Otomatis)</label>
-                        <input type="text" id="invTerbilang" readonly required value="Nol Rupiah" class="w-full border border-gray-300 p-2 rounded text-sm bg-gray-100 font-medium text-gray-700 focus:outline-none">
-                    </div>
-
-                    <button type="submit" class="w-full mt-4 bg-[#78350F] hover:bg-[#451A03] text-white font-bold p-3 rounded-lg shadow transition">
-                        💾 Simpan & Sinkron ke Spreadsheet
-                    </button>
-                </form>
+                        <button type="submit" class="w-full mt-4 bg-[#78350F] hover:bg-[#451A03] text-white font-bold p-3 rounded-lg shadow transition">
+                            💾 Simpan & Sinkron ke Spreadsheet
+                        </button>
+                    </form>
+                </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2 border border-gray-200 flex flex-col h-fit">
-                <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">2. Repositori Database Cloud Spreadsheet</h2>
-                <div class="overflow-y-auto max-h-[420px] border border-gray-100 rounded-lg shadow-inner">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead class="sticky top-0 bg-[#F5EBE0] text-[#78350F] font-bold border-b border-[#E3D5CA] z-10">
-                            <tr>
-                                <th class="p-3 text-center w-16">Pilih</th>
-                                <th class="p-3">No. Invoice</th>
-                                <th class="p-3">Pelanggan</th>
-                                <th class="p-3">Nilai Total</th>
-                                <th class="p-3 text-center">Status</th>
-                                <th class="p-3 text-center">Tindakan</th>
-                            </tr>
-                        </thead>
-                        <tbody id="database-rows" class="divide-y text-gray-700 bg-white">
-                            <tr><td colspan="6" class="p-4 text-center text-gray-400 italic">Memuat basis data dari Spreadsheet...</td></tr>
-                        </tbody>
-                    </table>
+            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2 border border-gray-200 flex flex-col h-full justify-between">
+                <div class="flex flex-col h-full">
+                    <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2 flex-none">2. Repositori Database Cloud Spreadsheet</h2>
+                    <div class="overflow-y-auto flex-grow h-0 border border-gray-100 rounded-lg shadow-inner">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead class="sticky top-0 bg-[#F5EBE0] text-[#78350F] font-bold border-b border-[#E3D5CA] z-10">
+                                <tr>
+                                    <th class="p-3 text-center w-16">Pilih</th>
+                                    <th class="p-3">No. Invoice</th>
+                                    <th class="p-3">Pelanggan</th>
+                                    <th class="p-3">Nilai Total</th>
+                                    <th class="p-3 text-center">Status</th>
+                                    <th class="p-3 text-center">Tindakan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="database-rows" class="divide-y text-gray-700 bg-white">
+                                <tr><td colspan="6" class="p-4 text-center text-gray-400 italic">Memuat basis data dari Spreadsheet...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -196,7 +200,7 @@
                     <div class="col-span-3 border-r border-gray-200 px-4 text-center flex flex-col items-center">
                         <h4 class="font-bold text-gray-900 uppercase text-[9px] tracking-wider mb-2">Atau Scan QRIS Resmi:</h4>
                         <div class="w-24 h-24 bg-white border p-1 rounded-md shadow-sm">
-                            <img src="https://github.com/kayunastudio/invoice-kayuna/blob/main/qris.JPG?raw=true" class="w-full h-full object-contain" alt="QRIS">
+                            <img src="https://raw.githubusercontent.com/kayunastudio/QRIS/main/qris.JPG" class="w-full h-full object-contain" alt="QRIS">
                         </div>
                     </div>
                     <div class="col-span-4 pl-4 text-right flex flex-col justify-between">
@@ -415,7 +419,6 @@
             rekapTotalSeketika();
         }
 
-        // Sempurnakan filter angka desimal agar kalkulasi subtotal berjalan lancar
         function hitungSubtotalBaris(rowElement) {
             const volStr = rowElement.querySelector('.row-vol').value;
             const harga = parseFloat(rowElement.querySelector('.row-harga').value) || 0;
