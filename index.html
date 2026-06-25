@@ -59,7 +59,7 @@
                     <div class="grid grid-cols-3 gap-2 mb-4">
                         <div class="col-span-2">
                             <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">No. Invoice</label>
-                            <input type="text" id="invNo" required placeholder="No. Invoice" value="" class="w-full border border-[#D5C3B3] p-2 rounded focus:outline-none focus:border-[#78350F] bg-white">
+                            <input type="text" id="invNo" required placeholder="Contoh: 26153-001" class="w-full border border-[#D5C3B3] p-2 rounded focus:outline-none focus:border-[#78350F] bg-white">
                         </div>
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Status</label>
@@ -81,9 +81,9 @@
                     </div>
 
                     <h3 class="text-sm font-bold text-[#78350F] mt-6 mb-2">Data Pelanggan</h3>
-                    <div class="mb-2"><input type="text" id="custNama" required placeholder="Nama Klien" value="" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></div>
-                    <div class="mb-2"><input type="text" id="custHp" required placeholder="No. HP" value="" class="w-full border p-2 rounded text-sm bg-white"></div>
-                    <div class="mb-4"><textarea id="custAlamat" required placeholder="Alamat" rows="2" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></textarea></div>
+                    <div class="mb-2"><input type="text" id="custNama" required placeholder="Nama Klien / Instansi" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></div>
+                    <div class="mb-2"><input type="text" id="custHp" required placeholder="No. Handphone" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></div>
+                    <div class="mb-4"><textarea id="custAlamat" required placeholder="Alamat lengkap tujuan invoice..." rows="2" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></textarea></div>
 
                     <h3 class="text-sm font-bold text-[#78350F] mt-6 mb-2 flex justify-between items-center">
                         <span>Daftar Transaksi</span>
@@ -103,26 +103,24 @@
                 </form>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2 border border-gray-200 flex flex-col justify-between">
-                <div>
-                    <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">2. Repositori Database Cloud Spreadsheet</h2>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-sm mb-4">
-                            <thead>
-                                <tr class="bg-[#F5EBE0] text-[#78350F] font-bold border-b border-[#E3D5CA]">
-                                    <th class="p-3 text-center w-16">Pilih</th>
-                                    <th class="p-3">No. Invoice</th>
-                                    <th class="p-3">Pelanggan</th>
-                                    <th class="p-3">Nilai Total</th>
-                                    <th class="p-3 text-center">Status</th>
-                                    <th class="p-3 text-center">Tindakan</th>
-                                </tr>
-                            </thead>
-                            <tbody id="database-rows" class="divide-y text-gray-700">
-                                <tr><td colspan="6" class="p-4 text-center text-gray-400 italic">Memuat basis data dari Spreadsheet...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2 border border-gray-200 flex flex-col h-fit">
+                <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">2. Repositori Database Cloud Spreadsheet</h2>
+                <div class="overflow-y-auto max-h-[420px] border border-gray-100 rounded-lg shadow-inner">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead class="sticky top-0 bg-[#F5EBE0] text-[#78350F] font-bold border-b border-[#E3D5CA] z-10">
+                            <tr>
+                                <th class="p-3 text-center w-16">Pilih</th>
+                                <th class="p-3">No. Invoice</th>
+                                <th class="p-3">Pelanggan</th>
+                                <th class="p-3">Nilai Total</th>
+                                <th class="p-3 text-center">Status</th>
+                                <th class="p-3 text-center">Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="database-rows" class="divide-y text-gray-700 bg-white">
+                            <tr><td colspan="6" class="p-4 text-center text-gray-400 italic">Memuat basis data dari Spreadsheet...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -219,11 +217,15 @@
         let currentInvoiceData = null;
 
         document.addEventListener("DOMContentLoaded", () => {
-            const hariIni = new Date().toISOString().split('T')[0];
-            document.getElementById('invTgl').value = hariIni;
-            document.getElementById('invTempo').value = hariIni;
+            // Pada awal dibuka, input parameter formulir sengaja dibiarkan kosong
+            document.getElementById('invNo').value = "";
+            document.getElementById('invTgl').value = "";
+            document.getElementById('invTempo').value = "";
+            document.getElementById('custNama').value = "";
+            document.getElementById('custHp').value = "";
+            document.getElementById('custAlamat').value = "";
 
-            tambahItemBaris("Deskripsi Jasa/ Barang", "Vol", 0, 577000);
+            tambahItemBaris("", "", "", 0);
             muatDataDariSpreadsheet();
 
             document.getElementById('wrapper-item-transaksi').addEventListener('input', (e) => {
@@ -237,24 +239,18 @@
         // HUBUNGAN KONTROL EXPORT PDF DINAMIS (PENAMAAN FILE OTOMATIS)
         // =========================================================================
         function pemicuCetakPdfDinamis() {
-            // Ambil nomor invoice aktif yang sedang ditampilkan di kertas cetak
             const nomorFaktur = document.getElementById('pdf-inv-no').innerText.trim();
             const namaKlien = document.getElementById('pdf-cust-nama').innerText.trim();
-            
-            // Simpan judul halaman asli untuk di-restore nanti
             const judulAsliHalaman = document.title;
 
-            // Jika nomor faktur valid, ubah title dokumen sementara agar menjadi nama file PDF
             if (nomorFaktur && nomorFaktur !== "-") {
                 document.title = `Invoice_${nomorFaktur}_${namaKlien.replace(/\s+/g, '_')}`;
             } else {
                 document.title = `Invoice_Kayuna_Studio`;
             }
 
-            // Panggil fungsi cetak bawaan browser
             window.print();
 
-            // Kembalikan judul halaman dasbor ke aslinya setelah dialog cetak selesai
             setTimeout(() => {
                 document.title = judulAsliHalaman;
             }, 1000);
@@ -419,6 +415,7 @@
             rekapTotalSeketika();
         }
 
+        // Sempurnakan filter angka desimal agar kalkulasi subtotal berjalan lancar
         function hitungSubtotalBaris(rowElement) {
             const volStr = rowElement.querySelector('.row-vol').value;
             const harga = parseFloat(rowElement.querySelector('.row-harga').value) || 0;
@@ -509,7 +506,6 @@
             }
         }
 
-        // Pilihan Cetak via tabel database cloud
         function pilihDataUntukCetak(noInvoice) {
             const target = listDatabaseInvoice.find(inv => inv.noInvoice === noInvoice);
             if(target) {
@@ -527,9 +523,13 @@
             document.getElementById('pdf-inv-tgl').innerText = ": " + formatTanggalIndonesia(invoice.tanggal);
             document.getElementById('pdf-inv-tempo').innerText = ": " + formatTanggalIndonesia(invoice.jatuhTempo);
             
+            document.getElementById('invNo').value = invoice.noInvoice;
             document.getElementById('invTgl').value = invoice.tanggal;
             document.getElementById('invTempo').value = invoice.jatuhTempo;
             document.getElementById('invStatus').value = invoice.status;
+            document.getElementById('custNama').value = invoice.pelanggan.nama;
+            document.getElementById('custHp').value = invoice.pelanggan.hp;
+            document.getElementById('custAlamat').value = invoice.pelanggan.alamat;
 
             document.getElementById('pdf-inv-terbilang').innerText = `"${invoice.terbilang}"`;
             document.getElementById('pdf-inv-total').innerText = "Rp. " + invoice.total.toLocaleString('id-ID');
@@ -624,19 +624,6 @@
             const target = listDatabaseInvoice.find(inv => inv.noInvoice === no);
             if(target) {
                 renderLembarKertasCetak(target);
-                document.getElementById('invNo').value = target.noInvoice;
-                document.getElementById('invTgl').value = target.tanggal;
-                document.getElementById('invTempo').value = target.jatuhTempo;
-                document.getElementById('custNama').value = target.pelanggan.nama;
-                document.getElementById('custHp').value = target.pelanggan.hp;
-                document.getElementById('custAlamat').value = target.pelanggan.alamat;
-                document.getElementById('invTerbilang').value = target.terbilang;
-
-                const wrapper = document.getElementById('wrapper-item-transaksi');
-                wrapper.innerHTML = "";
-                target.items.forEach(item => {
-                    tambahItemBaris(item.desc, item.vol, item.harga, item.sub);
-                });
             }
         }
     </script>
