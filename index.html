@@ -35,6 +35,7 @@
 </head>
 <body class="bg-[#FDFBF7] text-gray-800 min-h-screen font-sans">
 
+    <!-- PANEL UTAMA DASHBOARD -->
     <div class="container mx-auto p-6 max-w-7xl no-print">
         <header class="flex justify-between items-center mb-8 border-b-2 border-[#D97706] pb-4">
             <div>
@@ -52,6 +53,7 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+            <!-- PANEL KIRI: INPUT FORM -->
             <div class="bg-[#F5EBE0] p-6 rounded-xl shadow-md lg:col-span-1 border border-[#E3D5CA] flex flex-col justify-between h-full">
                 <div>
                     <h2 class="text-xl font-bold text-[#78350F] mb-4 border-b border-[#E3D5CA] pb-2">1. Input Parameter Dokumen</h2>
@@ -88,7 +90,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-[#92400E] mb-0.5">Tanggal Pembayaran DP</label>
-                                <input type="date" id="invDpTgl" class="w-full border border-[#D5C3B3] p-1.5 text-xs rounded bg-white text-gray-700 focus:outline-none focus:border-[#78350F]">
+                                <input type="date" id="invDpTgl" onchange="rekapTotalSeketika()" class="w-full border border-[#D5C3B3] p-1.5 text-xs rounded bg-white text-gray-700 focus:outline-none focus:border-[#78350F]">
                             </div>
                         </div>
 
@@ -116,6 +118,7 @@
                 </div>
             </div>
 
+            <!-- PANEL KANAN: REPOSITORI DATABASE SPREADSHEET -->
             <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2 border border-gray-200 flex flex-col h-full justify-between">
                 <div class="flex flex-col h-full">
                     <div class="flex justify-between items-center mb-4 border-b pb-2 flex-none">
@@ -146,9 +149,11 @@
         </div>
     </div>
 
+    <!-- TAMPILAN KERTAS INVOICE ASLI -->
     <div class="w-full flex justify-center py-4 bg-gray-200 print:bg-white print:py-0">
         <div id="invoice-paper" class="bg-white p-[20mm] border border-gray-300 shadow-xl print:shadow-none print:border-none relative flex flex-col justify-between text-black text-sm leading-relaxed">
             <div>
+                <!-- Header Banner -->
                 <div class="flex justify-between items-start mb-10">
                     <div>
                         <h1 class="text-3xl font-extrabold text-[#78350F] tracking-tight">KAYUNA STUDIO</h1>
@@ -160,6 +165,7 @@
                     </div>
                 </div>
 
+                <!-- Info Klien -->
                 <div class="grid grid-cols-2 gap-8 mb-8 text-xs">
                     <div class="bg-[#FDFBF7] p-4 rounded-lg border border-[#E3D5CA]">
                         <h3 class="font-bold text-[#78350F] uppercase tracking-wider mb-2 text-[10px]">Ditujukan Kepada:</h3>
@@ -178,6 +184,7 @@
                     </div>
                 </div>
 
+                <!-- Tabel Item Pekerjaan -->
                 <table class="w-full text-xs text-left mb-6 border-collapse">
                     <thead>
                         <tr class="bg-[#78350F] text-white font-bold uppercase text-[10px] tracking-wider">
@@ -191,17 +198,19 @@
                     <tbody id="pdf-table-body" class="divide-y divide-gray-200 text-gray-700"></tbody>
                 </table>
 
+                <!-- Rincian Biaya Berserta DP & Sisa Pelunasan -->
                 <div class="flex justify-between items-start mt-4 bg-[#F5EBE0]/40 p-4 rounded-xl border border-[#E3D5CA]">
                     <div class="max-w-[55%]">
                         <h4 class="text-[10px] font-bold uppercase text-gray-400 mb-1">Terbilang Sisa Pelunasan:</h4>
                         <p id="pdf-inv-terbilang" class="italic font-medium text-[#78350F] text-xs">"Nol Rupiah"</p>
-                        <div id="pdf-dp-info-block" class="mt-2 text-[11px] text-gray-600 hidden">
+                        <!-- NOTE: Area Informasi Detail DP yang Akan Muncul di Kertas Cetak A4/PDF -->
+                        <div id="pdf-dp-info-block" class="mt-2 text-[11px] text-gray-600 print:block hidden">
                             * Telah dibayarkan uang muka (DP) pada tanggal <span id="pdf-dp-tgl-text" class="font-semibold text-gray-800">-</span>
                         </div>
                     </div>
                     <div class="text-right min-w-[40%] space-y-1.5 text-xs text-gray-600">
                         <div class="flex justify-between"><span>Subtotal Pekerjaan:</span><span id="pdf-subtotal-raw" class="font-medium text-gray-900">Rp. 0</span></div>
-                        <div id="pdf-row-dp-nominal" class="flex justify-between text-amber-800 hidden"><span>Uang Muka (DP):</span><span id="pdf-dp-raw">-Rp. 0</span></div>
+                        <div id="pdf-row-dp-nominal" class="flex justify-between text-amber-800 hidden print:flex"><span>Uang Muka (DP):</span><span id="pdf-dp-raw">-Rp. 0</span></div>
                         <div class="flex justify-between text-base font-extrabold text-[#78350F] border-t border-[#D5C3B3] pt-1.5">
                             <span class="text-xs uppercase text-gray-500 font-bold self-center">Sisa Pelunasan:</span>
                             <span id="pdf-inv-total">Rp. 0</span>
@@ -210,6 +219,7 @@
                 </div>
             </div>
 
+            <!-- Footer Area -->
             <div class="mt-12 border-t border-[#E3D5CA] pt-8">
                 <div class="grid grid-cols-12 gap-6 text-xs text-gray-600">
                     <div class="col-span-5 border-r border-gray-200 pr-4">
@@ -237,6 +247,7 @@
         </div>
     </div>
 
+    <!-- ENGINE SCRIPT JAVASCRIPT KONEKSI GOOGLE SPREADSHEET VIA SHEETDB -->
     <script>
         const SHEETDB_API_URL = "https://sheetdb.io/api/v1/3sfyowqw8czq0"; 
 
@@ -412,11 +423,12 @@
                 if (!res.ok) throw new Error("Gagal menghapus baris di server.");
                 return res.json();
             })
-            .then(() => muatDataDariSpreadsheet())
+            .then(() => {
+                muatDataDariSpreadsheet();
+            })
             .catch(err => alert("Gagal menghapus dari Spreadsheet: " + err));
         }
 
-        // MODIFIKASI: Menambahkan parameter manualClear agar radio button bisa di-uncheck
         function bersihkanKertasInvoice(manualClear = false) {
             currentInvoiceData = null;
             document.getElementById('pdf-inv-no').innerText = "-";
@@ -557,7 +569,7 @@
                     alamat: document.getElementById('custAlamat').value
                 },
                 items: items,
-                total: sisaPelunasan, // Menyimpan nilai pelunasan akhir ke spreadsheet
+                total: sisaPelunasan, 
                 terbilang: document.getElementById('invTerbilang').value
             };
 
