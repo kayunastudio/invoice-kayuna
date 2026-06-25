@@ -12,7 +12,6 @@
         
         /* CSS Cetak Khusus agar Ekspor PDF Berfungsi Sempurna */
         @media print {
-            /* Menghilangkan header (judul/tanggal) dan footer (link URL/situs) bawaan browser */
             @page { 
                 margin: 0; 
             }
@@ -73,7 +72,7 @@
                         <div class="grid grid-cols-2 gap-2 mb-4">
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Tanggal</label>
-                                <input type="date" id="invTgl" required class="w-full border border-[#D5C3B3] p-2 rounded text-sm focus:outline-none focus:border-[#78350F] bg-white text-gray-700">
+                                <input type="date" id="invTgl" required onchange="hitungOtomatisJatuhTempo(this.value)" class="w-full border border-[#D5C3B3] p-2 rounded text-sm focus:outline-none focus:border-[#78350F] bg-white text-gray-700">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Jatuh Tempo</label>
@@ -81,12 +80,24 @@
                             </div>
                         </div>
 
-                        <h3 class="text-sm font-bold text-[#78350F] mt-6 mb-2">Data Pelanggan</h3>
+                        <div class="bg-[#E3D5CA]/40 p-3 rounded-lg border border-[#D5C3B3] mb-4 grid grid-cols-2 gap-2">
+                            <div class="col-span-2"><span class="text-xs font-bold text-[#78350F] uppercase tracking-wider block mb-1">Informasi Uang Muka (DP)</span></div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-[#92400E] mb-0.5">Nominal DP (Rp)</label>
+                                <input type="number" id="invDpNominal" placeholder="0" oninput="rekapTotalSeketika()" class="w-full border border-[#D5C3B3] p-1.5 text-xs rounded bg-white focus:outline-none focus:border-[#78350F]">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-[#92400E] mb-0.5">Tanggal Pembayaran DP</label>
+                                <input type="date" id="invDpTgl" class="w-full border border-[#D5C3B3] p-1.5 text-xs rounded bg-white text-gray-700 focus:outline-none focus:border-[#78350F]">
+                            </div>
+                        </div>
+
+                        <h3 class="text-sm font-bold text-[#78350F] mt-4 mb-2">Data Pelanggan</h3>
                         <div class="mb-2"><input type="text" id="custNama" required placeholder="Nama Klien / Instansi" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></div>
                         <div class="mb-2"><input type="text" id="custHp" required placeholder="No. Handphone" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></div>
                         <div class="mb-4"><textarea id="custAlamat" required placeholder="Alamat lengkap tujuan invoice..." rows="2" class="w-full border border-[#D5C3B3] p-2 rounded text-sm bg-white"></textarea></div>
 
-                        <h3 class="text-sm font-bold text-[#78350F] mt-6 mb-2 flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-[#78350F] mt-4 mb-2 flex justify-between items-center">
                             <span>Daftar Transaksi</span>
                             <button type="button" onclick="tambahItemBaris()" class="text-xs bg-[#E3D5CA] text-[#78350F] px-2 py-1 rounded font-bold hover:bg-[#D5C3B3]">+ Tambah</button>
                         </h3>
@@ -94,7 +105,7 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Terbilang Rupiah (Otomatis)</label>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Terbilang Rupiah Pelunasan (Otomatis)</label>
                             <input type="text" id="invTerbilang" readonly required value="Nol Rupiah" class="w-full border border-gray-300 p-2 rounded text-sm bg-gray-100 font-medium text-gray-700 focus:outline-none">
                         </div>
 
@@ -107,7 +118,12 @@
 
             <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2 border border-gray-200 flex flex-col h-full justify-between">
                 <div class="flex flex-col h-full">
-                    <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2 flex-none">2. Repositori Database Cloud Spreadsheet</h2>
+                    <div class="flex justify-between items-center mb-4 border-b pb-2 flex-none">
+                        <h2 class="text-xl font-bold text-gray-700">2. Repositori Database Cloud Spreadsheet</h2>
+                        <button onclick="bersihkanKertasInvoice(true)" class="bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200 text-xs px-3 py-1.5 rounded-lg shadow-sm transition font-medium">
+                            📭 Kosongkan Preview
+                        </button>
+                    </div>
                     <div class="overflow-y-auto flex-grow h-0 border border-gray-100 rounded-lg shadow-inner">
                         <table class="w-full text-left border-collapse text-sm">
                             <thead class="sticky top-0 bg-[#F5EBE0] text-[#78350F] font-bold border-b border-[#E3D5CA] z-10">
@@ -176,13 +192,20 @@
                 </table>
 
                 <div class="flex justify-between items-start mt-4 bg-[#F5EBE0]/40 p-4 rounded-xl border border-[#E3D5CA]">
-                    <div class="max-w-[60%]">
-                        <h4 class="text-[10px] font-bold uppercase text-gray-400 mb-1">Terbilang Pembayaran:</h4>
+                    <div class="max-w-[55%]">
+                        <h4 class="text-[10px] font-bold uppercase text-gray-400 mb-1">Terbilang Sisa Pelunasan:</h4>
                         <p id="pdf-inv-terbilang" class="italic font-medium text-[#78350F] text-xs">"Nol Rupiah"</p>
+                        <div id="pdf-dp-info-block" class="mt-2 text-[11px] text-gray-600 hidden">
+                            * Telah dibayarkan uang muka (DP) pada tanggal <span id="pdf-dp-tgl-text" class="font-semibold text-gray-800">-</span>
+                        </div>
                     </div>
-                    <div class="text-right min-w-[30%]">
-                        <span class="text-[10px] font-bold uppercase text-gray-400 block mb-1">Total Biaya Akhir</span>
-                        <span id="pdf-inv-total" class="text-xl font-extrabold text-[#78350F] block">Rp. 0</span>
+                    <div class="text-right min-w-[40%] space-y-1.5 text-xs text-gray-600">
+                        <div class="flex justify-between"><span>Subtotal Pekerjaan:</span><span id="pdf-subtotal-raw" class="font-medium text-gray-900">Rp. 0</span></div>
+                        <div id="pdf-row-dp-nominal" class="flex justify-between text-amber-800 hidden"><span>Uang Muka (DP):</span><span id="pdf-dp-raw">-Rp. 0</span></div>
+                        <div class="flex justify-between text-base font-extrabold text-[#78350F] border-t border-[#D5C3B3] pt-1.5">
+                            <span class="text-xs uppercase text-gray-500 font-bold self-center">Sisa Pelunasan:</span>
+                            <span id="pdf-inv-total">Rp. 0</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -221,14 +244,7 @@
         let currentInvoiceData = null;
 
         document.addEventListener("DOMContentLoaded", () => {
-            // Pada awal dibuka, input parameter formulir sengaja dibiarkan kosong
-            document.getElementById('invNo').value = "";
-            document.getElementById('invTgl').value = "";
-            document.getElementById('invTempo').value = "";
-            document.getElementById('custNama').value = "";
-            document.getElementById('custHp').value = "";
-            document.getElementById('custAlamat').value = "";
-
+            bersihkanFormulirInput();
             tambahItemBaris("", "", "", 0);
             muatDataDariSpreadsheet();
 
@@ -240,7 +256,33 @@
         });
 
         // =========================================================================
-        // HUBUNGAN KONTROL EXPORT PDF DINAMIS (PENAMAAN FILE OTOMATIS)
+        // KONTROL AUTO JATUH TEMPO (+2 HARI DARI TANGGAL INVOICE)
+        // =========================================================================
+        function hitungOtomatisJatuhTempo(stringTanggalInvoice) {
+            if (!stringTanggalInvoice) return;
+            const dateObj = new Date(stringTanggalInvoice);
+            
+            // Tambahkan jangka waktu 2 hari secara otomatis
+            dateObj.setDate(dateObj.getDate() + 2);
+            
+            const formatYmd = dateObj.toISOString().split('T')[0];
+            document.getElementById('invTempo').value = formatYmd;
+        }
+
+        function bersihkanFormulirInput() {
+            document.getElementById('invNo').value = "";
+            document.getElementById('invTgl').value = "";
+            document.getElementById('invTempo').value = "";
+            document.getElementById('invDpNominal').value = "";
+            document.getElementById('invDpTgl').value = "";
+            document.getElementById('custNama').value = "";
+            document.getElementById('custHp').value = "";
+            document.getElementById('custAlamat').value = "";
+            document.getElementById('wrapper-item-transaksi').innerHTML = "";
+        }
+
+        // =========================================================================
+        // KONTROL EXPORT PDF DINAMIS
         // =========================================================================
         function pemicuCetakPdfDinamis() {
             const nomorFaktur = document.getElementById('pdf-inv-no').innerText.trim();
@@ -370,13 +412,12 @@
                 if (!res.ok) throw new Error("Gagal menghapus baris di server.");
                 return res.json();
             })
-            .then(() => {
-                muatDataDariSpreadsheet();
-            })
+            .then(() => muatDataDariSpreadsheet())
             .catch(err => alert("Gagal menghapus dari Spreadsheet: " + err));
         }
 
-        function bersihkanKertasInvoice() {
+        // MODIFIKASI: Menambahkan parameter manualClear agar radio button bisa di-uncheck
+        function bersihkanKertasInvoice(manualClear = false) {
             currentInvoiceData = null;
             document.getElementById('pdf-inv-no').innerText = "-";
             document.getElementById('pdf-cust-nama').innerText = "-";
@@ -384,10 +425,19 @@
             document.getElementById('pdf-cust-alamat').innerText = "-";
             document.getElementById('pdf-inv-tgl').innerText = ": -";
             document.getElementById('pdf-inv-tempo').innerText = ": -";
+            document.getElementById('pdf-subtotal-raw').innerText = "Rp. 0";
             document.getElementById('pdf-inv-terbilang').innerText = `"Nol Rupiah"`;
             document.getElementById('pdf-inv-total').innerText = "Rp. 0";
             document.getElementById('pdf-table-body').innerHTML = "";
-            document.getElementById('invTerbilang').value = "Nol Rupiah";
+            document.getElementById('pdf-dp-info-block').classList.add('hidden');
+            document.getElementById('pdf-row-dp-nominal').classList.add('hidden');
+            
+            if(manualClear) {
+                bersihkanFormulirInput();
+                tambahItemBaris("", "", "", 0);
+                const rButtons = document.querySelectorAll('.print-selector');
+                rButtons.forEach(rb => rb.checked = false);
+            }
         }
 
         function tambahItemBaris(desc = "", vol = "", harga = "", sub = "") {
@@ -428,28 +478,56 @@
             rekapTotalSeketika();
         }
 
+        // REKAP UTAMA DENGAN KALKULASI DONGKRAK NILAI DP
         function rekapTotalSeketika() {
             const listBarisForm = document.querySelectorAll('.item-row');
-            let total = 0;
+            let subtotalPekerjaan = 0;
             listBarisForm.forEach(row => {
-                total += parseFloat(row.querySelector('.row-sub').value) || 0;
+                subtotalPekerjaan += parseFloat(row.querySelector('.row-sub').value) || 0;
             });
 
-            const teksTerbilang = konversiAngkaKeTerbilang(total);
+            // Ambil parameter nominal DP dari form input
+            const nominalDp = parseFloat(document.getElementById('invDpNominal').value) || 0;
+            const sisaPelunasan = subtotalPekerjaan - nominalDp;
+
+            const teksTerbilang = konversiAngkaKeTerbilang(sisaPelunasan);
             document.getElementById('invTerbilang').value = teksTerbilang;
 
+            // Transfusi data live ke preview cetak
+            document.getElementById('pdf-subtotal-raw').innerText = "Rp. " + subtotalPekerjaan.toLocaleString('id-ID');
+            
+            if (nominalDp > 0) {
+                document.getElementById('pdf-row-dp-nominal').classList.remove('hidden');
+                document.getElementById('pdf-dp-raw').innerText = "-Rp. " + nominalDp.toLocaleString('id-ID');
+                
+                const tglDpRaw = document.getElementById('invDpTgl').value;
+                if(tglDpRaw) {
+                    document.getElementById('pdf-dp-info-block').classList.remove('hidden');
+                    document.getElementById('pdf-dp-tgl-text').innerText = formatTanggalIndonesia(tglDpRaw);
+                } else {
+                    document.getElementById('pdf-dp-info-block').classList.add('hidden');
+                }
+            } else {
+                document.getElementById('pdf-row-dp-nominal').classList.add('hidden');
+                document.getElementById('pdf-dp-info-block').classList.add('hidden');
+            }
+
+            document.getElementById('pdf-inv-total').innerText = "Rp. " + sisaPelunasan.toLocaleString('id-ID');
+            document.getElementById('pdf-inv-terbilang').innerText = `"${teksTerbilang}"`;
+
             if(currentInvoiceData) {
-                currentInvoiceData.total = total;
+                currentInvoiceData.total = sisaPelunasan;
+                currentInvoiceData.subtotal = subtotalPekerjaan;
+                currentInvoiceData.dpNominal = nominalDp;
+                currentInvoiceData.dpTanggal = document.getElementById('invDpTgl').value;
                 currentInvoiceData.terbilang = teksTerbilang;
-                document.getElementById('pdf-inv-total').innerText = "Rp. " + total.toLocaleString('id-ID');
-                document.getElementById('pdf-inv-terbilang').innerText = `"${teksTerbilang}"`;
             }
         }
 
         function prosesDataInvoice() {
             const listBarisForm = document.querySelectorAll('.item-row');
             let items = [];
-            let total = 0;
+            let subtotalPekerjaan = 0;
 
             listBarisForm.forEach((row, idx) => {
                 const desc = row.querySelector('.row-desc').value;
@@ -458,22 +536,28 @@
                 const sub = parseFloat(row.querySelector('.row-sub').value) || 0;
                 if(desc !== "") {
                     items.push({ no: idx + 1, desc, vol, harga, sub });
-                    total += sub;
+                    subtotalPekerjaan += sub;
                 }
             });
+
+            const nominalDp = parseFloat(document.getElementById('invDpNominal').value) || 0;
+            const sisaPelunasan = subtotalPekerjaan - nominalDp;
 
             const invoiceBaru = {
                 noInvoice: document.getElementById('invNo').value,
                 status: document.getElementById('invStatus').value,
                 tanggal: document.getElementById('invTgl').value,
                 jatuhTempo: document.getElementById('invTempo').value,
+                dpNominal: nominalDp,
+                dpTanggal: document.getElementById('invDpTgl').value,
+                subtotal: subtotalPekerjaan,
                 pelanggan: {
                     nama: document.getElementById('custNama').value,
                     hp: document.getElementById('custHp').value,
                     alamat: document.getElementById('custAlamat').value
                 },
                 items: items,
-                total: total,
+                total: sisaPelunasan, // Menyimpan nilai pelunasan akhir ke spreadsheet
                 terbilang: document.getElementById('invTerbilang').value
             };
 
@@ -526,13 +610,35 @@
             document.getElementById('pdf-inv-tgl').innerText = ": " + formatTanggalIndonesia(invoice.tanggal);
             document.getElementById('pdf-inv-tempo').innerText = ": " + formatTanggalIndonesia(invoice.jatuhTempo);
             
+            // Pengembalian parameter ke formulir input
             document.getElementById('invNo').value = invoice.noInvoice;
             document.getElementById('invTgl').value = invoice.tanggal;
             document.getElementById('invTempo').value = invoice.jatuhTempo;
             document.getElementById('invStatus').value = invoice.status;
+            document.getElementById('invDpNominal').value = invoice.dpNominal || "";
+            document.getElementById('invDpTgl').value = invoice.dpTanggal || "";
             document.getElementById('custNama').value = invoice.pelanggan.nama;
             document.getElementById('custHp').value = invoice.pelanggan.hp;
             document.getElementById('custAlamat').value = invoice.pelanggan.alamat;
+
+            // Rincian Kalkulasi Cetak A4
+            const subtotalVal = invoice.subtotal || invoice.total || 0;
+            const dpVal = invoice.dpNominal || 0;
+            
+            document.getElementById('pdf-subtotal-raw').innerText = "Rp. " + subtotalVal.toLocaleString('id-ID');
+            if (dpVal > 0) {
+                document.getElementById('pdf-row-dp-nominal').classList.remove('hidden');
+                document.getElementById('pdf-dp-raw').innerText = "-Rp. " + dpVal.toLocaleString('id-ID');
+                if(invoice.dpTanggal) {
+                    document.getElementById('pdf-dp-info-block').classList.remove('hidden');
+                    document.getElementById('pdf-dp-tgl-text').innerText = formatTanggalIndonesia(invoice.dpTanggal);
+                } else {
+                    document.getElementById('pdf-dp-info-block').classList.add('hidden');
+                }
+            } else {
+                document.getElementById('pdf-row-dp-nominal').classList.add('hidden');
+                document.getElementById('pdf-dp-info-block').classList.add('hidden');
+            }
 
             document.getElementById('pdf-inv-terbilang').innerText = `"${invoice.terbilang}"`;
             document.getElementById('pdf-inv-total').innerText = "Rp. " + invoice.total.toLocaleString('id-ID');
@@ -566,7 +672,9 @@
             const volAngka = parseFloat(currentInvoiceData.items[itemIdx].vol.replace(/[^0-9,.]/g, '').replace(',', '.')) || 0;
             currentInvoiceData.items[itemIdx].sub = Math.round(volAngka * currentInvoiceData.items[itemIdx].harga);
             
-            currentInvoiceData.total = currentInvoiceData.items.reduce((acc, item) => acc + item.sub, 0);
+            currentInvoiceData.subtotal = currentInvoiceData.items.reduce((acc, item) => acc + item.sub, 0);
+            const dpVal = parseFloat(document.getElementById('invDpNominal').value) || 0;
+            currentInvoiceData.total = currentInvoiceData.subtotal - dpVal;
             currentInvoiceData.terbilang = konversiAngkaKeTerbilang(currentInvoiceData.total);
 
             const dbIdx = listDatabaseInvoice.findIndex(inv => inv.noInvoice === currentInvoiceData.noInvoice);
