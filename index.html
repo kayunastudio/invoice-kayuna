@@ -35,7 +35,6 @@
 </head>
 <body class="bg-[#FDFBF7] text-gray-800 min-h-screen font-sans">
 
-    <!-- PANEL UTAMA DASHBOARD -->
     <div class="container mx-auto p-6 max-w-7xl no-print">
         <header class="flex justify-between items-center mb-8 border-b-2 border-[#D97706] pb-4">
             <div>
@@ -53,7 +52,6 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
-            <!-- PANEL KIRI: INPUT FORM -->
             <div class="bg-[#F5EBE0] p-6 rounded-xl shadow-md lg:col-span-1 border border-[#E3D5CA] flex flex-col justify-between h-full">
                 <div>
                     <h2 class="text-xl font-bold text-[#78350F] mb-4 border-b border-[#E3D5CA] pb-2">1. Input Parameter Dokumen</h2>
@@ -65,7 +63,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-[#92400E] mb-1">Status</label>
-                                <select id="invStatus" onchange="perbaruiStatusStempelLive(this.value)" class="w-full border border-[#D5C3B3] p-2 rounded focus:outline-none focus:border-[#78350F] bg-white font-semibold text-sm">
+                                <select id="invStatus" class="w-full border border-[#D5C3B3] p-2 rounded focus:outline-none focus:border-[#78350F] bg-white font-semibold text-sm">
                                     <option value="Belum Lunas" class="text-amber-700 font-bold">❌ Belum Lunas</option>
                                     <option value="Lunas" class="text-emerald-700 font-bold">✅ Lunas</option>
                                 </select>
@@ -118,14 +116,19 @@
                 </div>
             </div>
 
-            <!-- PANEL KANAN: REPOSITORI DATABASE SPREADSHEET -->
             <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2 border border-gray-200 flex flex-col h-full justify-between">
                 <div class="flex flex-col h-full">
-                    <div class="flex justify-between items-center mb-4 border-b pb-2 flex-none">
-                        <h2 class="text-xl font-bold text-gray-700">2. Repositori Database Cloud Spreadsheet</h2>
-                        <button onclick="bersihkanKertasInvoice(true)" class="bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200 text-xs px-3 py-1.5 rounded-lg shadow-sm transition font-medium">
-                            📭 Kosongkan Preview
-                        </button>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 border-b pb-4 flex-none">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-700">2. Repositori Database Cloud Spreadsheet</h2>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <input type="text" id="dbSearchInput" oninput="jalankanPencarianDatabase(this.value)" placeholder="🔍 Cari No. Invoice / Pelanggan..." class="border border-gray-300 px-3 py-1.5 rounded-lg text-xs focus:outline-none focus:border-[#78350F] bg-white w-full sm:w-64 shadow-sm">
+                            
+                            <button onclick="bersihkanKertasInvoice(true)" class="bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200 text-xs px-3 py-1.5 rounded-lg shadow-sm transition font-medium whitespace-nowrap">
+                                📭 Kosongkan Preview
+                            </button>
+                        </div>
                     </div>
                     <div class="overflow-y-auto flex-grow h-0 border border-gray-100 rounded-lg shadow-inner">
                         <table class="w-full text-left border-collapse text-sm">
@@ -149,17 +152,14 @@
         </div>
     </div>
 
-    <!-- TAMPILAN KERTAS INVOICE ASLI -->
     <div class="w-full flex justify-center py-4 bg-gray-200 print:bg-white print:py-0">
         <div id="invoice-paper" class="bg-white p-[20mm] border border-gray-300 shadow-xl print:shadow-none print:border-none relative flex flex-col justify-between text-black text-sm leading-relaxed">
             
-            <!-- SEKSI BARU: ELEMEN STEMPEL LUNAS KONDISIONAL -->
             <div id="pdf-stamp-lunas" class="absolute top-[50mm] right-[25mm] border-4 border-emerald-600 text-emerald-600 font-black text-xl tracking-[0.2em] px-4 py-1.5 rounded-md uppercase font-sans select-none -rotate-12 opacity-85 pointer-events-none hidden bg-white/40 shadow-sm">
                 Lunas
             </div>
 
             <div>
-                <!-- Header Banner -->
                 <div class="flex justify-between items-start mb-10">
                     <div>
                         <h1 class="text-3xl font-extrabold text-[#78350F] tracking-tight">KAYUNA STUDIO</h1>
@@ -171,7 +171,6 @@
                     </div>
                 </div>
 
-                <!-- Info Klien -->
                 <div class="grid grid-cols-2 gap-8 mb-8 text-xs">
                     <div class="bg-[#FDFBF7] p-4 rounded-lg border border-[#E3D5CA]">
                         <h3 class="font-bold text-[#78350F] uppercase tracking-wider mb-2 text-[10px]">Ditujukan Kepada:</h3>
@@ -190,7 +189,6 @@
                     </div>
                 </div>
 
-                <!-- Tabel Item Pekerjaan -->
                 <table class="w-full text-xs text-left mb-6 border-collapse">
                     <thead>
                         <tr class="bg-[#78350F] text-white font-bold uppercase text-[10px] tracking-wider">
@@ -204,7 +202,6 @@
                     <tbody id="pdf-table-body" class="divide-y divide-gray-200 text-gray-700"></tbody>
                 </table>
 
-                <!-- Rincian Biaya Berserta DP & Sisa Pelunasan -->
                 <div class="flex justify-between items-start mt-4 bg-[#F5EBE0]/40 p-4 rounded-xl border border-[#E3D5CA]">
                     <div class="max-w-[55%]">
                         <h4 class="text-[10px] font-bold uppercase text-gray-400 mb-1">Terbilang Sisa Pelunasan:</h4>
@@ -224,7 +221,6 @@
                 </div>
             </div>
 
-            <!-- Footer Area -->
             <div class="mt-12 border-t border-[#E3D5CA] pt-8">
                 <div class="grid grid-cols-12 gap-6 text-xs text-gray-600">
                     <div class="col-span-5 border-r border-gray-200 pr-4">
@@ -252,7 +248,6 @@
         </div>
     </div>
 
-    <!-- ENGINE SCRIPT JAVASCRIPT KONEKSI GOOGLE SPREADSHEET VIA SHEETDB -->
     <script>
         const SHEETDB_API_URL = "https://sheetdb.io/api/v1/3sfyowqw8czq0"; 
 
@@ -272,7 +267,7 @@
         });
 
         // =========================================================================
-        // KONTROL LIVE UPDATE VISIBILITAS STEMPEL LUNAS
+        // LIVE SELECTION STEMPEL LUNAS
         // =========================================================================
         function perbaruiStatusStempelLive(statusVal) {
             const stempelElement = document.getElementById('pdf-stamp-lunas');
@@ -284,6 +279,26 @@
             if(currentInvoiceData) {
                 currentInvoiceData.status = statusVal;
             }
+        }
+
+        // =========================================================================
+        // LOGIKA BARU: SINKRONISASI PENCARIAN REPOSITORI DATABASE LIVE
+        // =========================================================================
+        function jalankanPencarianDatabase(kataKunci) {
+            const query = kataKunci.toLowerCase().trim();
+            if (query === "") {
+                renderDatabaseTable(listDatabaseInvoice);
+                return;
+            }
+
+            // Saring array data berdasarkan Nomor Invoice atau Nama Pelanggan
+            const dataHasilFilter = listDatabaseInvoice.filter(invoice => {
+                const noInv = (invoice.noInvoice || "").toLowerCase();
+                const namaKlien = (invoice.pelanggan?.nama || "").toLowerCase();
+                return noInv.includes(query) || namaKlien.includes(query);
+            });
+
+            renderDatabaseTable(dataHasilFilter);
         }
 
         // =========================================================================
@@ -385,11 +400,16 @@
             })
             .then(data => {
                 listDatabaseInvoice = data.map(row => JSON.parse(row.datajson));
-                renderDatabaseTable();
-                if(listDatabaseInvoice.length > 0) {
-                    pilihDataUntukCetak(listDatabaseInvoice[listDatabaseInvoice.length - 1].noInvoice);
+                // Ambil nilai box search aktif jika ada saat reload data
+                const searchVal = document.getElementById('dbSearchInput').value;
+                if(searchVal.trim() !== "") {
+                    jalankanPencarianDatabase(searchVal);
                 } else {
-                    bersihkanKertasInvoice();
+                    renderDatabaseTable(listDatabaseInvoice);
+                }
+                
+                if(listDatabaseInvoice.length > 0 && currentInvoiceData === null) {
+                    pilihDataUntukCetak(listDatabaseInvoice[listDatabaseInvoice.length - 1].noInvoice);
                 }
             })
             .catch(err => {
@@ -440,9 +460,7 @@
                 if (!res.ok) throw new Error("Gagal menghapus baris di server.");
                 return res.json();
             })
-            .then(() => {
-                muatDataDariSpreadsheet();
-            })
+            .then(() => muatDataDariSpreadsheet())
             .catch(err => alert("Gagal menghapus dari Spreadsheet: " + err));
         }
 
@@ -648,7 +666,6 @@
             document.getElementById('custHp').value = invoice.pelanggan.hp;
             document.getElementById('custAlamat').value = invoice.pelanggan.alamat;
 
-            // Update status stempel
             perbaruiStatusStempelLive(invoice.status);
 
             const subtotalVal = invoice.subtotal || invoice.total || 0;
@@ -715,15 +732,16 @@
             renderLembarKertasCetak(currentInvoiceData);
         }
 
-        function renderDatabaseTable() {
+        // MODIFIKASI: Menerima parameter data ter-filter untuk fungsi pencarian live
+        function renderDatabaseTable(targetArrayData = listDatabaseInvoice) {
             const tbody = document.getElementById('database-rows');
             tbody.innerHTML = "";
-            if(listDatabaseInvoice.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400 italic">Belum ada invoice yang tercatat.</td></tr>`;
+            if(targetArrayData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400 italic">Data invoice tidak ditemukan.</td></tr>`;
                 return;
             }
 
-            listDatabaseInvoice.forEach((invoice, idx) => {
+            targetArrayData.forEach((invoice, idx) => {
                 const statusStr = invoice.status || "Belum Lunas";
                 const isLunas = statusStr === "Lunas";
                 const badgeClass = isLunas 
@@ -740,7 +758,7 @@
                     </td>
                     <td class="p-3 font-bold text-[#78350F]">${invoice.noInvoice}</td>
                     <td class="p-3">
-                        <div class="font-semibold text-gray-900">${invoice.pelanggan.nama}</div>
+                        <div class="font-semibold text-gray-900">${invoice.pelanggan?.nama || '-'}</div>
                         <div class="text-[10px] text-gray-400">${formatTanggalIndonesia(invoice.tanggal)}</div>
                     </td>
                     <td class="p-3 font-bold text-gray-900">Rp. ${invoice.total.toLocaleString('id-ID')}</td>
