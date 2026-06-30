@@ -35,7 +35,6 @@
 </head>
 <body class="bg-[#FDFBF7] text-gray-800 min-h-screen font-sans">
 
-    <!-- PANEL UTAMA DASHBOARD -->
     <div class="container mx-auto p-4 sm:p-6 max-w-7xl no-print">
         <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8 border-b-2 border-[#D97706] pb-4">
             <div>
@@ -52,10 +51,8 @@
             </div>
         </header>
 
-        <!-- GRID UTAMA DASHBOARD -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch">
             
-            <!-- PANEL DATABASE SPREADSHEET -->
             <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md lg:col-span-2 border border-gray-200 flex flex-col h-[500px] lg:h-full justify-between order-1 lg:order-2">
                 <div class="flex flex-col h-full">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4 border-b pb-4 flex-none">
@@ -88,7 +85,6 @@
                 </div>
             </div>
 
-            <!-- PANEL INPUT FORM PARAMETER -->
             <div class="bg-[#F5EBE0] p-4 sm:p-6 rounded-xl shadow-md lg:col-span-1 border border-[#E3D5CA] flex flex-col justify-between h-full order-2 lg:order-1">
                 <div>
                     <h2 class="text-lg sm:text-xl font-bold text-[#78350F] mb-4 border-b border-[#E3D5CA] pb-2">1. Input Parameter Dokumen</h2>
@@ -156,17 +152,14 @@
         </div>
     </div>
 
-    <!-- TAMPILAN KERTAS INVOICE PREVIEW / EKSPOR PDF (A4) -->
     <div class="w-full overflow-x-auto flex justify-start md:justify-center py-4 bg-gray-200 print:bg-white print:py-0">
         <div id="invoice-paper" class="bg-white p-[10mm] sm:p-[20mm] border border-gray-300 shadow-xl print:shadow-none print:border-none relative flex flex-col justify-between text-black text-xs sm:text-sm leading-relaxed min-w-[210mm]">
             
-            <!-- ELEMEN STEMPEL LUNAS KONDISIONAL -->
             <div id="pdf-stamp-lunas" class="absolute top-[45mm] sm:top-[50mm] right-[20mm] sm:right-[25mm] border-4 border-emerald-600 text-emerald-600 font-black text-lg sm:text-xl tracking-[0.2em] px-4 py-1.5 rounded-md uppercase font-sans select-none -rotate-12 opacity-85 pointer-events-none hidden bg-white/40 shadow-sm">
                 Lunas
             </div>
 
             <div>
-                <!-- Header Banner -->
                 <div class="flex justify-between items-start mb-8 sm:mb-10">
                     <div>
                         <h1 class="text-2xl sm:text-3xl font-extrabold text-[#78350F] tracking-tight">KAYUNA STUDIO</h1>
@@ -178,7 +171,6 @@
                     </div>
                 </div>
 
-                <!-- Info Klien -->
                 <div class="grid grid-cols-2 gap-4 sm:gap-8 mb-8 text-[11px] sm:text-xs">
                     <div class="bg-[#FDFBF7] p-4 rounded-lg border border-[#E3D5CA]">
                         <h3 class="font-bold text-[#78350F] uppercase tracking-wider mb-2 text-[9px] sm:text-[10px]">Ditujukan Kepada:</h3>
@@ -197,7 +189,6 @@
                     </div>
                 </div>
 
-                <!-- Tabel Item Pekerjaan -->
                 <table class="w-full text-[11px] sm:text-xs text-left mb-6 border-collapse">
                     <thead>
                         <tr class="bg-[#78350F] text-white font-bold uppercase text-[9px] sm:text-[10px] tracking-wider">
@@ -211,7 +202,6 @@
                     <tbody id="pdf-table-body" class="divide-y divide-gray-200 text-gray-700"></tbody>
                 </table>
 
-                <!-- Rincian Biaya Berserta DP & Sisa Pelunasan -->
                 <div class="flex justify-between items-start mt-4 bg-[#F5EBE0]/40 p-4 rounded-xl border border-[#E3D5CA]">
                     <div class="max-w-[55%]">
                         <h4 class="text-[9px] sm:text-[10px] font-bold uppercase text-gray-400 mb-1">Terbilang Sisa Pelunasan:</h4>
@@ -231,11 +221,9 @@
                 </div>
             </div>
 
-            <!-- MODIFIKASI: AREA FOOTER DINAMIS (DIBUAT SEJAJAR 3 KOLOM) -->
             <div class="mt-10 sm:mt-12 border-t border-[#E3D5CA] pt-6 sm:pt-8">
                 <div class="grid grid-cols-3 gap-6 text-[11px] sm:text-xs text-gray-600 items-start">
                     
-                    <!-- Kolom 1: Informasi Rekening -->
                     <div class="border-r border-gray-200 pr-4">
                         <h4 class="font-bold text-gray-900 uppercase text-[9px] sm:text-[10px] tracking-wider mb-2">Informasi Pembayaran Rekening:</h4>
                         <div class="space-y-1.5 text-[10px] sm:text-[11px]">
@@ -245,7 +233,6 @@
                         </div>
                     </div>
                     
-                    <!-- Kolom 2: Scan QRIS (Diposisikan di Tengah Sejajar) -->
                     <div class="border-r border-gray-200 px-4 text-center flex flex-col items-center justify-start h-full">
                         <h4 class="font-bold text-gray-900 uppercase text-[8px] sm:text-[9px] tracking-wider mb-2">Atau Scan QRIS Resmi:</h4>
                         <div class="w-20 h-20 sm:w-24 sm:h-24 bg-white border p-1 rounded-md shadow-sm">
@@ -253,7 +240,6 @@
                         </div>
                     </div>
                     
-                    <!-- Kolom 3: Studio Office (Diposisikan di Kanan Sejajar) -->
                     <div class="pl-4 text-right">
                         <h4 class="font-bold text-gray-900 uppercase text-[9px] sm:text-[10px] tracking-wider mb-2">Kayuna Studio Office:</h4>
                         <p class="text-[9px] sm:text-[10px] text-gray-500 leading-normal">Jl. Sariwangi Selatan, Sariwangi, Parongpong, Kab. Bandung Barat</p>
@@ -264,7 +250,6 @@
         </div>
     </div>
 
-    <!-- ENGINE SCRIPT JAVASCRIPT KONEKSI GOOGLE SPREADSHEET VIA SHEETDB -->
     <script>
         const SHEETDB_API_URL = "https://sheetdb.io/api/v1/3sfyowqw8czq0"; 
 
@@ -626,7 +611,6 @@
             }
         }
 
-        自由f 
         function hapusFakturDariDb(noInvoice) {
             if(confirm(`Apakah Anda yakin ingin menghapus Invoice No: ${noInvoice} dari Google Sheets?`)) {
                 listDatabaseInvoice = listDatabaseInvoice.filter(inv => inv.noInvoice !== noInvoice);
@@ -772,10 +756,23 @@
             });
         }
 
+        // PERBAIKAN: Fungsi buka dari DB sekarang memuat ulang array transaksi item ke form input kiri secara utuh
         function bukaFakturDariDb(no) {
             const target = listDatabaseInvoice.find(inv => inv.noInvoice === no);
             if(target) {
                 renderLembarKertasCetak(target);
+                
+                // Bersihkan dan muat ulang baris transaksi ke form input parameter di kiri
+                const wrapper = document.getElementById('wrapper-item-transaksi');
+                wrapper.innerHTML = "";
+                
+                if (target.items && target.items.length > 0) {
+                    target.items.forEach(item => {
+                        tambahItemBaris(item.desc, item.vol, item.harga, item.sub);
+                    });
+                } else {
+                    tambahItemBaris("", "", "", 0);
+                }
             }
         }
     </script>
